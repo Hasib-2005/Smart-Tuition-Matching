@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student - Search Tutor</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background:lavender;  }
+        #search-box {
+            width: 1050px;
+            /* width: 80%; */
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px gray;
+        }
+        #searchForm {
+            display: flex;
+            text-align: center;
+            justify-content: center;
+        }
+        select, button {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 6px;
+            border: 1px solid gray;
+        }
+    
+        .tutor-card {
+            margin-top: 15px;
+            height: 190px;
+            padding: 30px;
+            border-radius: 10px;
+            background: #e0e7ff;
+
+            line-height: 24px;
+            border-style:solid;
+            border-width: 1.5px;
+            border-color:rgb(131, 185, 131);
+            margin: 30px;
+            text-align: center;
+        
+        }
+        .tutor-card b{
+            color: purple;
+        }
+        .tutor-card img   {
+            border-radius: 50%;
+            object-fit:cover;
+            height: 40px;
+            width: 40px;
+        } 
+        .tutor-card button { 
+            background-color: green;
+            color: white;
+            border-radius: 12px;
+        } 
+    </style>
+    </head>
+    <body>
+    <header>
+        <h2 style="letter-spacing: 1.5px;">Smart Tuition Media</h2>
+        <nav class="navi">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="admins.html">Admins</a>
+        <a href="tutor.html">Tutor</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html" class="logout" onclick="logout()">Log out</a>
+        </nav>
+    </header>
+
+    <div id="fake"></div>
+
+    <div id="search-box">
+        <h1 style="text-align: center;color: purple;">🔍 Search Tutors</h1>
+        <br>
+        <form id="searchForm">
+
+        <select id="subject">
+            <option value="">Select Subject</option>
+            <option>Bangla</option>
+            <option>English</option>
+            <option>Math</option>
+            <option>Higher Math</option>
+            <option>Physics</option>
+            <option>Chemistry</option>
+            <option>Biology</option>
+            <option>Economics</option>
+            <option>Accounting</option>
+            <option>ICT</option>
+        </select>
+
+        <select id="location">
+            <option value="">Select Location</option>
+            <option>Surma</option>
+            <option>Akhalia</option>
+            <option>Amborkhana</option>
+            <option>Zindabazar</option>
+            <option>Madina Market</option>
+            <option>Shibganj</option>
+            <option>Tilagor</option>
+            <option>Kumarpara</option>
+            <option>Lama Bazar</option>
+            <option>Bondor</option>
+            <option>Shahjalal Upashahar</option>
+            <option>Subidbazar</option>
+            <option>Mirabazar</option>
+            <option>Pathantula</option>
+            <option>Uposhohor</option>
+            <option>Kazir Bazar</option>
+            <option>Dargah Gate</option>
+            <option>Chowhatta</option>
+            <option>Modina Tower</option>
+            <option>Shahporan</option>
+            <option>Housing Estate</option>
+            <option>Electric Supply Road</option>
+            <option>Majortila</option>
+            <option>Kala Pahar</option>
+            <option>Shahi Eidgah</option>
+            <option>Pirer Bazar</option>
+            <option>Masimpur</option>
+            <option>Bagbari</option>
+            <option>Tilagarh Eco Park Area</option>
+            <option>Shuktara</option>
+            <option>Noyasarak</option>
+            <option>Uposhohor Point</option>
+            <option>Rikabibazar</option>
+            <option>Naya Sarak</option>
+            <option>Shahjalal University Area</option>
+            <option>Khuliya</option>
+            <option>South Surma</option>
+            <option>Mukterpara</option>
+            <option>Chalibandar</option>
+        </select>
+
+        <select id="salary">
+            <option value="">Salary Range</option>
+            <option>2000-4000</option>
+            <option>4000-6000</option>
+            <option>6000+</option>
+        </select>
+        <button type="submit">Search</button>
+        </form>
+        <div id="results">
+
+        </div>
+    </div>
+
+    <script>
+    window.onload = function(){
+    let user = JSON.parse(localStorage.getItem("currentUser"));
+    if(!user){
+        alert("Please login as a student to access this page.");
+        window.location.href = "login.html";
+        return;
+    }
+
+    // Role check: hide tutor nav link if student
+    if(user.role === "student"){
+        let tutorLink = document.querySelector('a[href="tutor.html"]');
+        if(tutorLink) tutorLink.style.display = "none";
+    }
+    if(user.role === "tutor"){
+        let studentLink = document.querySelector('a[href="student.html"]');
+        if(studentLink) studentLink.style.display = "none";
+    }
+
+    // Tutor list show (default)
+    let tutors = JSON.parse(localStorage.getItem("tutors")) || [];
+    let results = document.getElementById("results");
+    results.innerHTML = "";
+
+    tutors.forEach(t => {
+        results.innerHTML += `
+        <div class="tutor-card">
+            <img src="https://img.icons8.com/color/96/000000/student-male--v2.png">
+            <h3>${t.name}</h3>
+            <p><b>Varsity:</b> ${t.varsity}</p>
+            <p><b>Subject:</b> ${t.subject}</p>
+            <p><b>Location:</b> ${t.location}</p>
+            <p><b>Salary:</b> ${t.salary}</p>
+            <button onclick="handleChat('${t.name}')">Chat Now</button>
+        </div>
+        `;
+    });
+    }
+
+    // Filter & search tutors
+    document.getElementById("searchForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    let subject = document.getElementById("subject").value;
+    let location = document.getElementById("location").value;
+    let salary = document.getElementById("salary").value;
+
+    let tutors = JSON.parse(localStorage.getItem("tutors")) || [];
+    let results = document.getElementById("results");
+    results.innerHTML = "";
+
+    let filtered = tutors.filter(t => {
+        if(subject){
+            let tutorSubjects = t.subject.toLowerCase().split(",").map(s=>s.trim());
+            if(!tutorSubjects.includes(subject.toLowerCase())) return false;
+        }
+        if(location && t.location !== location) return false;
+        if(salary){
+            let sal = parseInt(t.salary);
+            if(salary === "2000-4000" && (sal < 2000 || sal > 4000)) return false;
+            if(salary === "4000-6000" && (sal < 4000 || sal > 6000)) return false;
+            if(salary === "6000+" && sal < 6000) return false;
+        }
+        return true;
+    });
+
+    if(filtered.length === 0){
+        results.innerHTML = "<p>No tutor found.</p>";
+    } else {
+        filtered.forEach(t=>{
+        results.innerHTML += `
+            <div class="tutor-card">
+            <img src="https://img.icons8.com/color/96/000000/student-male--v2.png">
+            <h3> ${t.name}</h3>
+            <p><b>Varsity:</b> ${t.varsity}</p>
+            <p><b>Subject:</b> ${t.subject}</p>
+            <p><b>Location:</b> ${t.location}</p>
+            <p><b>Salary:</b> ${t.salary}</p>
+            <button onclick="handleChat('${t.name}')">Chat Now</button>
+            </div>
+        `;
+        });
+    }
+    });
+
+    // Chat Function
+    function handleChat(tutorName){
+    let user = JSON.parse(localStorage.getItem("currentUser"));
+    if(!user){
+        alert("Please login first.");
+        window.location.href = "login.html";
+        return;
+    }
+    openChat(tutorName);
+    }
+
+    function openChat(tutorName){
+        let msg = prompt("✉️ Enter your message for " + tutorName + ":");
+        if(msg){
+            let chats = JSON.parse(localStorage.getItem("chats")) || [];
+            chats.push({ tutor: tutorName, message: msg, from: "student" });
+            localStorage.setItem("chats", JSON.stringify(chats));
+            alert("✅ Message sent to " + tutorName);
+        }
+    }
+
+    function logout(){
+        localStorage.removeItem("currentUser");
+        window.location.href = "login.html";
+    }
+    </script>
+
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tuition website</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h2 style="letter-spacing: 1.5px;">Smart Tuition Media</h2>
+        <nav class="navi">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="admins.html">Admins</a>
+            <a href="contact.html">Contact</a>
+            <a href="login.html" id="loginBtn">Login</a>
+            <a href="#" id="logoutBtn" style="display:none;" onclick="logout()">Logout</a>
+        </nav>
+    </header>
+    <div id="fake">
+        <!-- ফাকা জায়গা বানানো যাতে ফিক্সড বার এর নিচে সব ঢেকে না যায়  -->
+    </div>
+    <div id="main">
+        <div id="part1">
+            <img src="https://img.icons8.com/color/96/000000/student-male--v2.png" class="topimage-img">
+            <p id="p1">Find Your Perfect Tutor or <br>
+            Student </p> <br>
+            <p id="p2">Country's #1 Tutor Matching & <br>
+            Learning Platform.</p> <br> <br>
+            <p id="p3">Hire a conversant tutor to make your children's learning fun, comprehensive & easier.</p>
+            <button class="bt" onclick="goToPage('tutor')">I am a teacher</button>
+            <button class="bt" onclick="goToPage('student')">I am a student</button>
+        </div>
+        <div id="part2">
+            <div id="box1" class="box">
+                <img src="https://img.icons8.com/color/96/000000/student-male--v2.png">
+                <p id="totalTutors">0</p>
+                <p>total tutors</p>
+            </div>
+            <div id="box2" class="box">
+                <img src="https://img.icons8.com/color/96/000000/book.png">
+                <p id="para">120+</p>
+                <p>successful matches</p>
+            </div>
+            <div id="box3" class="box">
+                <img src="https://img.icons8.com/color/96/000000/pencil--v2.png">
+                <p id="para">4.9/5</p>
+                <p>Avg. Tutor Rating</p>
+            </div>
+        </div>
+
+        <div><p id="middle">Meet Our Admins</p></div>
+
+        <div id="part3">
+            <div class="picbox">
+                <img src="hasib copy.jpg" style="width: 65px; height: 65px;">
+                <h4 style="padding-top: 13px;"> Mohammod Hasibur Rahman</h4>
+                <p> B.Sc(CSE, SUST)</p>
+            </div>
+            <div class="picbox">
+                <img src="tithi.avif" style="width: 65px; height: 65px;"><br>         
+                <h4 style="padding-top: 13px;"> Tithi Rani <br>Das</h4>
+                <p> B.Sc(CSE, SUST)</p>
+            </div>
+            <div class="picbox">
+                <img src="siam.jpg" style="width: 65px; height: 65px;">
+                <h4 style="padding-top: 13px;"> Toufiqul Hossain <br>Siam</h4>
+                <p> B.Sc(CSE, SUST)</p>
+            </div>
+            <div  class="picbox">
+                <img src="ishmam.jpg" style="width: 65px; height: 65px;">
+                <h4 style="padding-top: 13px;" >Syed Ishmamul <br>Hauqe</h4>
+                <p> B.Sc(CSE, SUST)</p>
+            </div>
+            <div  class="picbox">
+                <img src="sami.jpg" style="width: 65px; height: 65px;">
+                <h4 style="padding-top: 13px;" > Arman Nesar <br>Samy</h4>
+                <p> B.Sc(CSE, SUST)</p>
+            </div>
+        </div>
+        <div id="part4">
+            <div class="no">
+                <h3>Smart tuition media</h3>
+                <p>country's #1 matching media</p>
+            </div>
+            <div class="no">
+                <h3>Contact</h3>
+                <p>Email: info@smarttuition.com</p>
+                <p>Phone: +880 1234 567890</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goToPage(role){
+            let user = JSON.parse(localStorage.getItem("currentUser"));
+
+            if(!user){
+                if(role === "student"){
+                alert("Please login as a student to access this page.");
+                } else if(role === "tutor"){
+                alert("Please login as a tutor to access this page.");
+                }
+                window.location.href = "login.html";
+                return;
+            }
+
+            if(user.role === role){
+                if(role === "student"){
+                window.location.href = "student.html";
+                } else if(role === "tutor"){
+                window.location.href = "tutor.html";
+                }
+            } 
+            else {
+                alert("🚫 You are logged in as " + user.role + ". Access denied!");
+            }
+        }
+
+        window.onload = function(){
+            let user = JSON.parse(localStorage.getItem("currentUser"));
+
+            if(user){
+                document.getElementById("loginBtn").style.display = "none";
+                document.getElementById("logoutBtn").style.display = "inline-block";
+            } else {
+                document.getElementById("loginBtn").style.display = "inline-block";
+                document.getElementById("logoutBtn").style.display = "none";
+            }
+
+            let tutors = JSON.parse(localStorage.getItem("tutors")) || [];
+            document.getElementById("totalTutors").innerText = tutors.length;
+        }
+
+        function logout(){
+            localStorage.removeItem("currentUser");
+            window.location.href = "login.html";
+        }
+    </script>
+
+</body>
+</html>

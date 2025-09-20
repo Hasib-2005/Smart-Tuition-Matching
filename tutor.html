@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutor - Post Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #ddd6f5;  }
+        #post-box {
+            width: 60%;
+            margin: 100px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        #post-box h2 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+        input, select {
+            width: 95%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid gray;
+            font-size: 15px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #165b3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #28845c;
+        }
+        #msg {
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        #inbox {
+            width: 60%;
+            margin: 30px auto;
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        #inbox h3 {
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+        .chat-msg {
+            background: #fff;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+    </head>
+
+    <body>
+    <header>
+        <h2 style="letter-spacing: 1.5px;">Smart Tuition Media</h2>
+        <nav class="navi">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="admins.html">Admins</a>
+        <a href="contact.html">Contact</a>
+        <a href="#" onclick="logout()">Log out</a>
+        </nav>
+    </header>
+    <div id="fake"></div>
+
+    <div id="post-box">
+        <h1 style="text-align: center;color: purple;">📝 Post Tutor Profile</h1>
+        <form id="tutorForm">
+        <input type="text" id="name" placeholder="Tutor Name" required>
+        <input type="text" id="varsity" placeholder="University Name" required>
+        
+        <label for="subject">Select Subject:</label>
+        <select id="subject" required>
+            <option value="">-- Select Subject --</option>
+            <option>Physics, Math</option>
+            <option>Biology, Chemistry</option>
+            <option>Bangla, English, ICT</option>
+            <option>Physics, Math, ICT</option>
+            <option>Bangla</option>
+            <option>English</option>
+            <option>Math</option>
+            <option>Higher Math</option>
+            <option>Physics</option>
+            <option>Chemistry</option>
+            <option>Biology</option>
+            <option>Economics</option>
+            <option>Accounting</option>
+            <option>ICT</option>
+        </select>
+
+        <label for="location">Select Location:</label>
+        <select id="location" required>
+            <option value="">-- Select Location --</option>
+            <option>Surma</option>
+            <option>Akhalia</option>
+            <option>Amborkhana</option>
+            <option>Zindabazar</option>
+            <option>Madina Market</option>
+            <option>Shibganj</option>
+            <option>Tilagor</option>
+            <option>Kumarpara</option>
+            <option>Lama Bazar</option>
+            <option>Bondor</option>
+            <option>Shahjalal Upashahar</option>
+            <option>Subidbazar</option>
+            <option>Mirabazar</option>
+            <option>Pathantula</option>
+            <option>Uposhohor</option>
+            <option>Kazir Bazar</option>
+            <option>Dargah Gate</option>
+            <option>Chowhatta</option>
+            <option>Modina Tower</option>
+            <option>Shahporan</option>
+            <option>Housing Estate</option>
+            <option>Majortila</option>
+            <option>Shahi Eidgah</option>
+            <option>Noyasarak</option>
+            <option>South Surma</option>
+            <option>Shahjalal University Area</option>
+        </select>
+
+        <input type="number" id="salary" placeholder="Expected Salary" required>
+        <button type="submit">Post Profile</button>
+        </form>
+
+        <div id="msg"></div>
+    </div>
+
+    <div id="tutorPosts" style="width:60%; margin:30px auto;"></div>
+
+    <!-- ✅ Student Messages Inbox -->
+    <div id="inbox">
+        <h3>📩 Messages from Students</h3>
+        <div id="chatList"></div>
+    </div>
+
+    <script>
+    window.onload = function(){
+        let user = JSON.parse(localStorage.getItem("currentUser"));
+        if(!user){
+            alert("Please login as a tutor to access this page.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        // Role-based nav hide
+        if(user.role === "student"){
+            let tutorLink = document.querySelector('a[href="tutor.html"]');
+            if(tutorLink) tutorLink.style.display = "none";
+        }
+        if(user.role === "tutor"){
+            let studentLink = document.querySelector('a[href="student.html"]');
+            if(studentLink) studentLink.style.display = "none";
+        }
+
+        showTutorPosts();
+
+        document.getElementById("tutorForm").addEventListener("submit", function(e){
+            e.preventDefault();
+
+            let name = document.getElementById("name").value;
+            let varsity = document.getElementById("varsity").value;
+            let subject = document.getElementById("subject").value;
+            let location = document.getElementById("location").value;
+            let salary = document.getElementById("salary").value;
+
+            let tutors = JSON.parse(localStorage.getItem("tutors")) || [];
+            tutors.push({ name, varsity, subject, location, salary });
+            localStorage.setItem("tutors", JSON.stringify(tutors));
+
+            let currentUser = JSON.parse(localStorage.getItem("currentUser")) || {};
+            currentUser.name = name;
+            localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+            document.getElementById("msg").innerHTML = "<p style='color:green;'>✅ Profile posted!</p>";
+            document.getElementById("tutorForm").reset();
+
+            showTutorPosts();
+        });
+    };
+
+    function showTutorPosts(){
+        let tutors = JSON.parse(localStorage.getItem("tutors")) || [];
+        let tutorPostsDiv = document.getElementById("tutorPosts");
+        tutorPostsDiv.innerHTML = "";
+
+        if(tutors.length === 0){
+            tutorPostsDiv.innerHTML = "<p>No tutor profiles posted yet.</p>";
+        } else {
+            tutors.forEach(t=>{
+            tutorPostsDiv.innerHTML += `
+                <div class="tutor-card" style="background:#e0e7ff; padding:20px; border-radius:10px; border:1.5px solid rgb(131,185,131); text-align:center; margin-bottom:20px;">
+                <img src="https://img.icons8.com/color/96/000000/student-male--v2.png" style="border-radius:50%; height:40px; width:40px; object-fit:cover;">
+                <h3>${t.name}</h3>
+                <p><b>Varsity:</b> ${t.varsity}</p>
+                <p><b>Subject:</b> ${t.subject}</p>
+                <p><b>Location:</b> ${t.location}</p>
+                <p><b>Salary:</b> ${t.salary}</p>
+                </div>
+            `;
+            });
+        }
+    }
+
+    function logout(){
+        localStorage.removeItem("currentUser");
+        window.location.href = "login.html";
+    }
+    </script>
+
+</body>
+</html>

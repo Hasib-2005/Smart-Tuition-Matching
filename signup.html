@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #ddd6f5;
+        }
+        #signup-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px gray;
+            width: 320px;
+        }
+        input, select {
+            width: 95%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid gray;
+            border-radius: 6px;
+            background-color: white;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #165b3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #28845c;
+        }
+    </style>
+    </head>
+    <body>
+    <div id="signup-box">
+        <h1 style="text-align:center; color: #64155c;">Sign up</h1>
+        <form id="signupForm">
+        <input type="text" id="name" placeholder="Enter Name" required>
+        <input type="email" id="email" placeholder="Enter Email" required>
+        <input type="password" id="password" placeholder="Enter Password" required>
+        <select id="role" required>
+            <option value="">Select Role</option>
+            <option value="student">Student</option>
+            <option value="tutor">Tutor</option>
+        </select>
+        <button type="submit">Signup</button>
+        </form>
+        <p style="text-align:center; margin-top:10px;">
+        Already have an account? <a href="login.html">Log in</a>
+        </p>
+    </div>
+    <script>
+    document.getElementById("signupForm").addEventListener("submit", function(e){
+        e.preventDefault();
+        let name = document.getElementById("name").value;
+        let email = document.getElementById("email").value;
+        let password = document.getElementById("password").value;
+        let role = document.getElementById("role").value;
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if(!emailPattern.test(email)){
+            alert("Please enter a valid email address.");
+            return;
+        }
+        let users = JSON.parse(localStorage.getItem("users")) || [];
+        if(users.find(u => u.email === email)){
+        alert("User already exists!");
+        return;
+        }
+        users.push({ name, email, password, role });
+        localStorage.setItem("users", JSON.stringify(users));
+        alert("Signup successful! Please login.");
+        window.location.href = "login.html";
+    });
+    </script>
+</body>
+</html>

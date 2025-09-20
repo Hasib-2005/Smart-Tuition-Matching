@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | Smart Tuition Media</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+    * {
+        margin: 0%;
+        padding: 0%;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        header {
+            /* background: linear-gradient(90deg, #3f3d56 0%, #6c63ff 100%); */
+            background: linear-gradient(to right, #1e293b, #6366f1);
+            height: 67px;
+            width: 100%;
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            z-index: 20;
+        }
+
+        h2 {
+            width: 55%;
+            transform: translate(40px, 0px);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: x-large;
+        }
+
+        #fake {
+            /* height: 12%; */
+            height: 67px;
+            width: 100%;
+        }
+        .navi a {
+            margin-right: 40px;
+            color: white;
+            font-size: large;
+            text-decoration: none;
+            padding: 9px 10px;
+            border-radius: 10px;
+        }
+        .navi a button {
+            color: #6c63ff;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+        .navi a button:hover {
+            background-color: #6c63ff;
+            color: white;
+            border-color: white;
+        }
+
+        .navi a:hover {
+            background-color: white;
+            color: #6c63ff;
+        }
+        #main{
+            height: 100%;
+            width: 100%;
+            background-color: #ddd6f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #about
+        {
+            height: 340px;
+            width: 700px;
+            transform: translate(0px,-25px);
+            
+            background-color:rgb(194, 209, 165);
+            background-color:  #b3dbbd;
+
+            border-radius: 15px;
+            font-size: large;
+            border: 1px solid #127a2c;
+        }
+        #pp
+        {
+            margin-top: 25px;
+            font-size: large;
+            margin-left: 25px;
+        }
+        #ul1
+        {
+            margin-top: 25px;
+            margin-left: 45px;
+        }
+
+    </style>
+    </head>
+
+    <body>
+        <header>
+        <h2 style="letter-spacing: 1.5px;">Smart Tuition Media</h2>
+        <nav class="navi">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="admins.html">Admins</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+        </header>
+        <div id="fake">
+
+        </div>
+
+        <div id="main">
+        <div id="about">
+            <h1 style="text-align: center; margin-top: 20px;color:rgb(102, 2, 102)">About Us</h1>
+            <p id="pp">
+            <b style="color:rgb(92, 12, 92) ;">Smart Tuition Media</b> is one of the leading tutor-matching platforms in the country.<br><br>
+            Our goal is to create an easy and “smart” connection between skilled teachers and enthusiastic students.
+            </p>
+            <ul type = "square" id="ul1">
+            <li>Many years of experience</li>
+            <li>Trusted and experienced team</li>
+            <li>Simple, modern usability</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

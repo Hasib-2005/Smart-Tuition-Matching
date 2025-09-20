@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0%;
+            padding: 0%;
+        }
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+        header {
+            background: linear-gradient(to right, #1e293b, #6366f1);
+            height: 67px;
+            width: 100%;
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            z-index: 20;
+
+        }
+
+        h2 {
+            width: 55%;
+            transform: translate(40px, 0px);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: x-large;
+        }
+
+        #fake {
+            height: 67px;
+            width: 100%;
+        }
+
+        .navi a {
+            margin-right: 40px;
+            color: white;
+            font-size: large;
+            text-decoration: none;
+            padding: 9px 10px;
+            border-radius: 10px;
+
+
+        }
+
+        .navi a button {
+            color: #6c63ff;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+
+        .navi a button:hover {
+            background-color: #6c63ff;
+            color: white;
+            border-color: white;
+        }
+
+        .navi a:hover {
+            background-color: white;
+            color: #6c63ff;
+        }
+
+        #main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+            background-color: #ddd6f5;
+        }
+
+        #contact {
+            margin-top:70px ;
+            height: 460px;
+            width: 700px;
+            transform: translate(0px, -25px);
+            /* background-color: rgb(194, 209, 165); */
+            background-color:  #b3dbbd;
+            
+            border-radius: 15px;
+            font-size: large;
+
+            border: 1px solid #127a2c;
+        }
+
+        #contact p {
+            padding: 25px;
+        }
+
+        #contact ul {
+            padding-left: 50px;
+            padding-bottom: 25px;
+        }
+        label {
+            color: rgb(92, 12, 92);
+            padding-left:  20px;
+            font-weight: 1000;
+        }
+        #name{
+            height: 20px;
+            width: 95%;
+
+            margin: 10px;
+            padding: 7px;
+            border: 1px solid #127a2c;
+            border-radius: 6px;
+            background: #f7fffa;
+            font-size: 14px;
+        }
+        #msg{
+            height: 40px;
+            width: 95%;
+        
+            margin: 10px;
+            padding: 7px;
+            border: 1px solid #127a2c;
+            border-radius: 6px;
+            background: #f7fffa;
+            font-size: 14px;
+        }
+
+        #btn{
+            margin-top: 10px;
+            margin-left: 10px;
+            padding : 8px 18px;
+
+            background-color: #074712;
+            color: white;
+            border-radius: 18px;
+            border-color: #015302bf;
+            font-size: medium;
+        }
+        #btn:hover {
+            background: #2d8553;
+        }
+    </style>
+
+</head>
+
+<body>
+    <header>
+        <h2 style="letter-spacing: 1.5px;">Smart Tuition Media</h2>
+        <nav class="navi">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="admins.html">Admins</a>
+            <a href="contact.html">Contact</a>
+
+        </nav>
+    </header>
+    <div id="fake">
+    </div>
+    <div id="main">
+        <div id="contact">
+
+            <h1 style="text-align: center; margin-top: 10px;color:rgb(102, 2, 102)">Contact Us</h1>
+            <p id="pa"> If you have any questions, please fill out the form below or use the
+                contact information―</p>
+            <ul id="uc">
+                <li><b style="color:rgb(92, 12, 92) ;">Email :</b> info@smarttuition.com</li>
+                <li><b style="color:rgb(92, 12, 92) ;">Phone :</b> +8801XXXXXXXXX</li>
+                <li><b style="color:rgb(92, 12, 92) ;">Address :</b> SUST , SYLHET</li>
+            </ul>
+            <form id="contactform">
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" required><br>
+
+            <label for="msg">Message:</label><br>
+            <textarea id="msg" rows="4" required></textarea><br>
+
+            <button id="btn" type="submit">Send</button>
+            </form>
+
+            <script>
+            window.onload = function () {
+                const user = JSON.parse(localStorage.getItem("currentUser"));
+                if (user && user.name) {
+                const nameInput = document.getElementById("name");
+                nameInput.value = user.name;
+                }
+            };
+            document.getElementById("contactform").addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                const user = JSON.parse(localStorage.getItem("currentUser"));
+                if (!user) {
+                alert("Please login to send a message.");
+                window.location.href = "login.html";
+                return;
+                }
+
+                const name = document.getElementById("name").value.trim();
+                const msg  = document.getElementById("msg").value.trim();
+                if (!name || !msg) {
+                alert("Please fill in all fields.");
+                return;
+                }
+
+                const messages = JSON.parse(localStorage.getItem("messages")) || [];
+                messages.push({
+                    userEmail: user.email || "",  
+                    name,
+                    message: msg,
+                    time: new Date().toISOString()
+                });
+                localStorage.setItem("messages", JSON.stringify(messages));
+
+                alert("✅ Thank you! Your message has been sent.");
+                this.reset();
+            });
+            </script>
+
+
+
+</body>
+
+</html>
