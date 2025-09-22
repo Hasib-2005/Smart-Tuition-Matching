@@ -6,7 +6,13 @@
     <title>Chat</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        body { background:#f3eefe; }
+        body { background:#f3eefe; margin: 0; font-family: Arial, sans-serif; }
+        header { background: #6366f1; color: white; padding: 0.5rem 1rem; display: flex; justify-content: space-between; align-items: center; }
+        header h2 { margin: 0; }
+        .navi a { color: white; text-decoration: none; margin-left: 1rem; }
+        .navi a:hover { text-decoration: underline; }
+        .badge { background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px; }
+        #fake { height: 20px; }
         #container { width: 1000px; margin: 20px auto; display: flex; gap: 15px; }
         #sidebar { width: 320px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow: hidden; }
         #thread { flex: 1; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
@@ -17,14 +23,15 @@
         .convItem.active { background:#eef2ff; }
         .convTitle { font-weight: 700; color:#111827; }
         .convSub { font-size: 12px; color:#6b7280; }
-        #messages { flex: 1; padding: 16px; overflow: auto; background:#f8fafc; }
+        #messages { flex: 1; padding: 16px; overflow: auto; background:#f8fafc; min-height: 400px; }
         .msg { max-width: 70%; margin: 6px 0; padding: 10px 12px; border-radius: 12px; line-height: 1.3; }
         .fromMe { background:#6366f1; color: white; margin-left: auto; border-bottom-right-radius: 4px; }
         .fromThem { background:white; color: #111827; border: 1px solid #e5e7eb; border-bottom-left-radius: 4px; }
         #composer { display: flex; gap: 8px; padding: 12px; border-top: 1px solid #e5e7eb; }
-        #messageInput { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #c7d2fe; }
-        #sendBtn { padding: 10px 16px; background:#165b3c; color:white; border:none; border-radius:10px; }
+        #messageInput { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #c7d2fe; outline: none; }
+        #sendBtn { padding: 10px 16px; background:#165b3c; color:white; border:none; border-radius:10px; cursor: pointer; }
         #sendBtn:hover { background:#28845c; }
+        #sendBtn:disabled { background: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -34,7 +41,7 @@
             <a href="index.html">Home</a>
             <a href="about.html">About</a>
             <a href="admins.html">Admins</a>
-            <a href="chat.html">Chat <span id=\"chatBadge\" class=\"badge\" style=\"display:none;\"></span></a>
+            <a href="chat.html">Chat <span id="chatBadge" class="badge" style="display:none;"></span></a>
             <a href="#" onclick="logout()">Log out</a>
         </nav>
     </header>
@@ -59,16 +66,24 @@
     </div>
 
     <script>
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if(!currentUser){
-        alert('Please login first.');
-        window.location.href = 'login.html';
+    // Initialize or get current user
+    let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    if(!currentUser || !currentUser.email){
+        // For demo/testing purposes, create a default user
+        currentUser = {
+            email: 'user@example.com',
+            name: 'Current User',
+            role: 'User'
+        };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
     }
 
+    // Get URL parameters
     const qs = new URLSearchParams(window.location.search);
-    const prefillEmail = qs.get('toEmail');
-    const prefillName = qs.get('toName');
+    const prefillEmail = qs.get('toEmail') || 'kaj@example.com';
+    const prefillName = qs.get('toName') || 'Kaj Kortese';
 
+    // DOM elements
     const convListDiv = document.getElementById('convList');
     const messagesDiv = document.getElementById('messages');
     const activeTitleSpan = document.getElementById('activeTitle');
@@ -79,50 +94,82 @@
     let activePeerEmail = null;
     let activePeerName = null;
 
+    // Message management functions
     function getAllMessages(){
-        return JSON.parse(localStorage.getItem('messages')) || [];
-    }
-    function saveAllMessages(all){
-        localStorage.setItem('messages', JSON.stringify(all));
+        try {
+            return JSON.parse(localStorage.getItem('messages') || '[]');
+        } catch (e) {
+            console.error('Error loading messages:', e);
+            return [];
+        }
     }
 
-    function getThreadKey(a,b){
-        return [a,b].sort().join('||');
+    function saveAllMessages(all){
+        try {
+            localStorage.setItem('messages', JSON.stringify(all));
+            console.log('Messages saved successfully:', all.length, 'total messages');
+        } catch (e) {
+            console.error('Error saving messages:', e);
+        }
+    }
+
+    function getThreadKey(a, b){
+        return [a, b].sort().join('||');
     }
 
     function listConversations(){
         const all = getAllMessages();
         const map = new Map();
+        
         for(const m of all){
             const peer = m.from === currentUser.email ? m.to : m.from;
             const key = getThreadKey(currentUser.email, peer);
             if(!map.has(key)){
-                map.set(key, { peerEmail: peer, lastAt: m.at, lastText: m.text });
-            }else{
-                if(m.at > map.get(key).lastAt){
-                    map.get(key).lastAt = m.at;
+                map.set(key, { 
+                    peerEmail: peer, 
+                    lastAt: new Date(m.at).getTime(), 
+                    lastText: m.text 
+                });
+            } else {
+                const msgTime = new Date(m.at).getTime();
+                if(msgTime > map.get(key).lastAt){
+                    map.get(key).lastAt = msgTime;
                     map.get(key).lastText = m.text;
                 }
             }
         }
-        return Array.from(map.values()).sort((a,b)=>b.lastAt - a.lastAt);
+        
+        return Array.from(map.values()).sort((a,b) => b.lastAt - a.lastAt);
     }
 
     function renderConversations(){
         const items = listConversations();
         convListDiv.innerHTML = '';
+        
         if(items.length === 0){
             convListDiv.innerHTML = '<div class="convItem"><div class="convSub">No conversations yet.</div></div>';
             return;
         }
+        
         for(const c of items){
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            const peerUser = users.find(u=>u.email===c.peerEmail);
-            const title = peerUser ? (peerUser.name + ' (' + peerUser.role + ')') : c.peerEmail;
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const peerUser = users.find(u => u.email === c.peerEmail);
+            
+            // Show actual name if found in users list, otherwise show email
+            let title = c.peerEmail;
+            if (peerUser) {
+                title = peerUser.name + ' (' + peerUser.role + ')';
+            } else if (c.peerEmail === prefillEmail && prefillName) {
+                // Use prefill name from URL if available
+                title = prefillName;
+            }
+            
             const item = document.createElement('div');
-            item.className = 'convItem' + (c.peerEmail===activePeerEmail?' active':'');
-            item.innerHTML = '<div class="convTitle">' + title + '</div>' +
-                            '<div class="convSub">' + (c.lastText || '') + '</div>';
+            item.className = 'convItem' + (c.peerEmail === activePeerEmail ? ' active' : '');
+            item.innerHTML = `
+                <div class="convTitle">${title}</div>
+                <div class="convSub">${c.lastText || 'No messages yet'}</div>
+            `;
             item.onclick = () => openConversation(c.peerEmail);
             convListDiv.appendChild(item);
         }
@@ -130,85 +177,180 @@
 
     function renderThread(){
         if(!activePeerEmail){
-            messagesDiv.innerHTML = '';
+            messagesDiv.innerHTML = '<div style="text-align: center; color: #6b7280; margin-top: 50px;">Select a conversation to start chatting</div>';
             activeTitleSpan.textContent = 'Select a conversation';
             activeMetaSmall.textContent = '';
             return;
         }
+        
         const all = getAllMessages();
         const key = getThreadKey(currentUser.email, activePeerEmail);
-        const thread = all.filter(m=>getThreadKey(m.from, m.to)===key);
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        const peerUser = users.find(u=>u.email===activePeerEmail);
-        activePeerName = peerUser ? peerUser.name : (prefillName || activePeerEmail);
+        const thread = all.filter(m => getThreadKey(m.from, m.to) === key);
+        
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const peerUser = users.find(u => u.email === activePeerEmail);
+        
+        // Determine the display name for active conversation
+        if (peerUser) {
+            activePeerName = peerUser.name;
+        } else if (activePeerEmail === prefillEmail && prefillName) {
+            activePeerName = prefillName;
+        } else {
+            activePeerName = activePeerEmail;
+        }
+        
         activeTitleSpan.textContent = activePeerName;
         activeMetaSmall.textContent = peerUser ? peerUser.role : '';
 
         messagesDiv.innerHTML = '';
-        for(const m of thread){
-            const bubble = document.createElement('div');
-            const isMe = m.from === currentUser.email;
-            bubble.className = 'msg ' + (isMe ? 'fromMe' : 'fromThem');
-            bubble.textContent = m.text;
-            messagesDiv.appendChild(bubble);
+        
+        if(thread.length === 0){
+            messagesDiv.innerHTML = '<div style="text-align: center; color: #6b7280; margin-top: 50px;">No messages yet. Start the conversation!</div>';
+        } else {
+            for(const m of thread){
+                const bubble = document.createElement('div');
+                const isMe = m.from === currentUser.email;
+                bubble.className = 'msg ' + (isMe ? 'fromMe' : 'fromThem');
+                bubble.textContent = m.text;
+                messagesDiv.appendChild(bubble);
+            }
         }
+        
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
-function openConversation(peerEmail){
-    activePeerEmail = peerEmail;
-    renderConversations();
-    renderThread();
-    // mark messages to me in this opened thread as seen now
-    localStorage.setItem('chat:lastSeen:'+currentUser.email, Date.now().toString());
-    updateChatBadge();
-}
+    function openConversation(peerEmail){
+        activePeerEmail = peerEmail;
+        renderConversations();
+        renderThread();
+        
+        // Mark messages as seen
+        localStorage.setItem('chat:lastSeen:' + currentUser.email, Date.now().toString());
+        updateChatBadge();
+        
+        // Focus on input
+        inputEl.focus();
+    }
 
     function sendMessage(){
         const text = inputEl.value.trim();
-        if(!text || !activePeerEmail) return;
-        const all = getAllMessages();
-        all.push({ from: currentUser.email, to: activePeerEmail, text, at: Date.now() });
-        saveAllMessages(all);
-        inputEl.value = '';
-        renderConversations();
-        renderThread();
-    }
-
-    sendBtn.addEventListener('click', sendMessage);
-    inputEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendMessage(); } });
-
-    window.addEventListener('storage', (e)=>{
-        if(e.key === 'messages'){
+        if(!text) {
+            alert('Please type a message');
+            return;
+        }
+        
+        if(!activePeerEmail) {
+            alert('Please select a conversation first');
+            return;
+        }
+        
+        // Disable send button temporarily
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Sending...';
+        
+        try {
+            const all = getAllMessages();
+            const newMessage = { 
+                from: currentUser.email, 
+                to: activePeerEmail, 
+                text: text, 
+                at: new Date().toISOString(),
+                id: Date.now() + '_' + Math.random()
+            };
+            
+            all.push(newMessage);
+            saveAllMessages(all);
+            
+            inputEl.value = '';
             renderConversations();
             renderThread();
+            
+            console.log('Message sent successfully:', newMessage);
+            
+        } catch (error) {
+            console.error('Error sending message:', error);
+            alert('Failed to send message. Please try again.');
+        } finally {
+            // Re-enable send button
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send';
+            inputEl.focus();
+        }
+    }
+
+    // Event listeners
+    sendBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        sendMessage();
+    });
+
+    inputEl.addEventListener('keydown', function(e) {
+        if(e.key === 'Enter') {
+            e.preventDefault();
+            sendMessage();
         }
     });
 
-// Prefill: open conversation from URL if provided
-if(prefillEmail){
-    activePeerEmail = prefillEmail;
-}
-    renderConversations();
-    renderThread();
+    // Storage change listener
+    window.addEventListener('storage', function(e) {
+        if(e.key === 'messages'){
+            renderConversations();
+            renderThread();
+            updateChatBadge();
+        }
+    });
+
+    function updateChatBadge(){
+        const badge = document.getElementById('chatBadge');
+        if(!badge) return;
+        
+        const all = getAllMessages();
+        const lastSeen = parseInt(localStorage.getItem('chat:lastSeen:' + currentUser.email) || '0');
+        const count = all.filter(m => m.to === currentUser.email && new Date(m.at).getTime() > lastSeen).length;
+        
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+        if(count > 0) badge.textContent = count;
+    }
 
     function logout(){
         localStorage.removeItem('currentUser');
         window.location.href = 'login.html';
     }
-// do not mark seen on page load; only on thread open
-    // also keep badge updated in header on chat page
-    function updateChatBadge(){
-        const badge = document.getElementById('chatBadge');
-        if(!badge) return;
-        const all = getAllMessages();
-        const lastSeen = parseInt(localStorage.getItem('chat:lastSeen:'+currentUser.email) || '0');
-        const count = all.filter(m=>m.to===currentUser.email && m.at>lastSeen).length;
-        badge.style.display = count>0 ? 'inline-block' : 'none';
-        if(count>0) badge.textContent = count;
+
+    // Initialize default users if not exists
+    function initializeDefaultUsers() {
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        if (users.length === 0) {
+            const defaultUsers = [
+                { email: 'user@example.com', name: 'Current User', role: 'User' },
+                { email: 'kaj@example.com', name: 'Kaj Kortese', role: 'Admin' }
+            ];
+            localStorage.setItem('users', JSON.stringify(defaultUsers));
+        }
     }
-    updateChatBadge();
-    window.addEventListener('storage', function(e){ if(e.key==='messages'){ updateChatBadge(); }});
+
+    // Initialize the application
+    function init() {
+        initializeDefaultUsers();
+        
+        // Auto-open conversation if specified in URL
+        if(prefillEmail){
+            activePeerEmail = prefillEmail;
+        }
+        
+        renderConversations();
+        renderThread();
+        updateChatBadge();
+        
+        // Focus on input if conversation is active
+        if(activePeerEmail) {
+            inputEl.focus();
+        }
+    }
+
+    // Start the application
+    init();
+
     </script>
 </body>
 </html>

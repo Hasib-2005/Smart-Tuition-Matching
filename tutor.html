@@ -1,235 +1,369 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tutor - Post Profile</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body { background: #ddd6f5;  }
-        #post-box {
-            width: 60%;
-            margin: 100px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tutor - Post Profile</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { background: #ddd6f5; }
+    #post-box {
+      width: 60%;
+      margin: 100px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    #post-box h2 { text-align: center; color: #1e293b; margin-bottom: 20px; }
+    input, select {
+      width: 95%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid gray;
+      font-size: 15px;
+      background: white;
+    }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #165b3c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover { background: #28845c; }
+    #msg { margin-top: 10px; text-align: center; font-weight: bold; }
+    #inbox {
+      width: 60%;
+      margin: 30px auto;
+      background: #f1f5f9;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    #inbox h3 { margin-bottom: 15px; color: #1e293b; }
+    .chat-msg {
+      background: #fff;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-left: 4px solid #6366f1;
+    }
+    .chat-msg .sender {
+      font-weight: bold;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+    .chat-msg .message {
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    .chat-msg .time {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 10px;
+    }
+    .reply-btn {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .reply-btn:hover {
+      background: #4f46e5;
+    }
+    .no-messages {
+      text-align: center;
+      color: #6b7280;
+      font-style: italic;
+      padding: 20px;
+    }
+    .new-message {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .message-count {
+      background: #ef4444;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 8px;
+      font-size: 12px;
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2 style="letter-spacing: 1.5px;">Smart Tuition Media</h2>
+    <nav class="navi">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="admins.html">Admins</a>
+      <a href="contact.html">Contact</a>
+      <a href="#" onclick="logout()">Log out</a>
+    </nav>
+  </header>
+  <div id="fake"></div>
+
+  <div id="post-box">
+    <h1 style="text-align:center;color:purple;">📝 Post Tutor Profile</h1>
+    <form id="tutorForm">
+      <input type="text" id="name" placeholder="Tutor Name" required />
+      <input type="text" id="varsity" placeholder="University Name" required />
+
+      <label for="subject">Select Subject:</label>
+      <select id="subject" required>
+        <option value="">-- Select Subject --</option>
+        <option>Physics, Math</option>
+        <option>Biology, Chemistry</option>
+        <option>Bangla, English, ICT</option>
+        <option>Physics, Math, ICT</option>
+        <option>Bangla</option>
+        <option>English</option>
+        <option>Math</option>
+        <option>Higher Math</option>
+        <option>Physics</option>
+        <option>Chemistry</option>
+        <option>Biology</option>
+        <option>Economics</option>
+        <option>Accounting</option>
+        <option>ICT</option>
+      </select>
+
+      <label for="location">Select Location:</label>
+      <select id="location" required>
+        <option value="">-- Select Location --</option>
+        <option>Surma</option>
+        <option>Akhalia</option>
+        <option>Amborkhana</option>
+        <option>Zindabazar</option>
+        <option>Madina Market</option>
+        <option>Shibganj</option>
+        <option>Tilagor</option>
+        <option>Kumarpara</option>
+        <option>Lama Bazar</option>
+        <option>Bondor</option>
+        <option>Shahjalal Upashahar</option>
+        <option>Subidbazar</option>
+        <option>Mirabazar</option>
+        <option>Pathantula</option>
+        <option>Uposhohor</option>
+        <option>Kazir Bazar</option>
+        <option>Dargah Gate</option>
+        <option>Chowhatta</option>
+        <option>Modina Tower</option>
+        <option>Shahporan</option>
+        <option>Housing Estate</option>
+        <option>Majortila</option>
+        <option>Shahi Eidgah</option>
+        <option>Noyasarak</option>
+        <option>South Surma</option>
+        <option>Shahjalal University Area</option>
+      </select>
+
+      <input type="number" id="salary" placeholder="Expected Salary" required />
+      <button type="submit">Post Profile</button>
+    </form>
+
+    <div id="msg"></div>
+  </div>
+
+  <div id="tutorPosts" style="width:60%; margin:30px auto;"></div>
+
+  <!-- 📥 Enhanced Inbox with proper SMS receiving functionality -->
+  <div id="inbox">
+    <h3>📩 Messages from Students <span id="messageCount" class="message-count" style="display:none;">0</span></h3>
+    <div id="chatList"></div>
+  </div>
+
+  <script>
+    let currentUser;
+    let messageCheckInterval;
+
+    window.onload = function () {
+      currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      if (!currentUser) {
+        alert("Please login as a tutor to access this page.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      // Role-based nav hide
+      if (currentUser.role === "student") {
+        const tutorLink = document.querySelector('a[href="tutor.html"]');
+        if (tutorLink) tutorLink.style.display = "none";
+      }
+      if (currentUser.role === "tutor") {
+        const studentLink = document.querySelector('a[href="student.html"]');
+        if (studentLink) studentLink.style.display = "none";
+      }
+
+      showTutorPosts();
+      loadMessages(); // Load messages immediately
+      
+      // Check for new messages every 2 seconds
+      messageCheckInterval = setInterval(loadMessages, 2000);
+
+      // Listen for storage changes (when new messages arrive)
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'messages') {
+          loadMessages();
         }
-        #post-box h2 {
-            text-align: center;
-            color: #1e293b;
-            margin-bottom: 20px;
-        }
-        input, select {
-            width: 95%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 6px;
-            border: 1px solid gray;
-            font-size: 15px;
-        }
-        label {
-            display: block;
-            margin-top: 10px;
-            font-weight: bold;
-        }
+      });
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #165b3c;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #28845c;
-        }
-        #msg {
-            margin-top: 10px;
-            text-align: center;
-            font-weight: bold;
-        }
-        #inbox {
-            width: 60%;
-            margin: 30px auto;
-            background: #f1f5f9;
-            padding: 20px;
-            border-radius: 10px;
-        }
-        #inbox h3 {
-            margin-bottom: 10px;
-            color: #1e293b;
-        }
-        .chat-msg {
-            background: #fff;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 6px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-    </style>
-    </head>
+      document
+        .getElementById("tutorForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
 
-    <body>
-    <header>
-        <h2 style="letter-spacing: 1.5px;">Smart Tuition Media</h2>
-        <nav class="navi">
-        <a href="index.html">Home</a>
-        <a href="about.html">About</a>
-        <a href="admins.html">Admins</a>
-        <a href="contact.html">Contact</a>
-        <a href="#" onclick="logout()">Log out</a>
-        </nav>
-    </header>
-    <div id="fake"></div>
+          const name = document.getElementById("name").value.trim();
+          const varsity = document.getElementById("varsity").value.trim();
+          const subject = document.getElementById("subject").value;
+          const location = document.getElementById("location").value;
+          const salary = document.getElementById("salary").value;
 
-    <div id="post-box">
-        <h1 style="text-align: center;color: purple;">📝 Post Tutor Profile</h1>
-        <form id="tutorForm">
-        <input type="text" id="name" placeholder="Tutor Name" required>
-        <input type="text" id="varsity" placeholder="University Name" required>
-        
-        <label for="subject">Select Subject:</label>
-        <select id="subject" required>
-            <option value="">-- Select Subject --</option>
-            <option>Physics, Math</option>
-            <option>Biology, Chemistry</option>
-            <option>Bangla, English, ICT</option>
-            <option>Physics, Math, ICT</option>
-            <option>Bangla</option>
-            <option>English</option>
-            <option>Math</option>
-            <option>Higher Math</option>
-            <option>Physics</option>
-            <option>Chemistry</option>
-            <option>Biology</option>
-            <option>Economics</option>
-            <option>Accounting</option>
-            <option>ICT</option>
-        </select>
+          const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
 
-        <label for="location">Select Location:</label>
-        <select id="location" required>
-            <option value="">-- Select Location --</option>
-            <option>Surma</option>
-            <option>Akhalia</option>
-            <option>Amborkhana</option>
-            <option>Zindabazar</option>
-            <option>Madina Market</option>
-            <option>Shibganj</option>
-            <option>Tilagor</option>
-            <option>Kumarpara</option>
-            <option>Lama Bazar</option>
-            <option>Bondor</option>
-            <option>Shahjalal Upashahar</option>
-            <option>Subidbazar</option>
-            <option>Mirabazar</option>
-            <option>Pathantula</option>
-            <option>Uposhohor</option>
-            <option>Kazir Bazar</option>
-            <option>Dargah Gate</option>
-            <option>Chowhatta</option>
-            <option>Modina Tower</option>
-            <option>Shahporan</option>
-            <option>Housing Estate</option>
-            <option>Majortila</option>
-            <option>Shahi Eidgah</option>
-            <option>Noyasarak</option>
-            <option>South Surma</option>
-            <option>Shahjalal University Area</option>
-        </select>
+          // ✅ Save tutor email alongside profile so students can route to chat.html
+          tutors.push({
+            name,
+            varsity,
+            subject,
+            location,
+            salary,
+            email: currentUser.email || ""
+          });
+          localStorage.setItem("tutors", JSON.stringify(tutors));
 
-        <input type="number" id="salary" placeholder="Expected Salary" required>
-        <button type="submit">Post Profile</button>
-        </form>
+          // Keep currentUser.name in sync with tutor profile name
+          currentUser.name = name;
+          localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
-        <div id="msg"></div>
-    </div>
+          document.getElementById("msg").innerHTML =
+            "<p style='color:green;'>✅ Profile posted!</p>";
+          document.getElementById("tutorForm").reset();
 
-    <div id="tutorPosts" style="width:60%; margin:30px auto;"></div>
-
-    <!-- ✅ Student Messages Inbox -->
-    <div id="inbox">
-        <h3>📩 Messages from Students</h3>
-        <div id="chatList"></div>
-    </div>
-
-    <script>
-    window.onload = function(){
-        let user = JSON.parse(localStorage.getItem("currentUser"));
-        if(!user){
-            alert("Please login as a tutor to access this page.");
-            window.location.href = "login.html";
-            return;
-        }
-
-        // Role-based nav hide
-        if(user.role === "student"){
-            let tutorLink = document.querySelector('a[href="tutor.html"]');
-            if(tutorLink) tutorLink.style.display = "none";
-        }
-        if(user.role === "tutor"){
-            let studentLink = document.querySelector('a[href="student.html"]');
-            if(studentLink) studentLink.style.display = "none";
-        }
-
-        showTutorPosts();
-
-        document.getElementById("tutorForm").addEventListener("submit", function(e){
-            e.preventDefault();
-
-            let name = document.getElementById("name").value;
-            let varsity = document.getElementById("varsity").value;
-            let subject = document.getElementById("subject").value;
-            let location = document.getElementById("location").value;
-            let salary = document.getElementById("salary").value;
-
-            let tutors = JSON.parse(localStorage.getItem("tutors")) || [];
-            tutors.push({ name, varsity, subject, location, salary });
-            localStorage.setItem("tutors", JSON.stringify(tutors));
-
-            let currentUser = JSON.parse(localStorage.getItem("currentUser")) || {};
-            currentUser.name = name;
-            localStorage.setItem("currentUser", JSON.stringify(currentUser));
-
-            document.getElementById("msg").innerHTML = "<p style='color:green;'>✅ Profile posted!</p>";
-            document.getElementById("tutorForm").reset();
-
-            showTutorPosts();
+          showTutorPosts();
         });
     };
 
-    function showTutorPosts(){
-        let tutors = JSON.parse(localStorage.getItem("tutors")) || [];
-        let tutorPostsDiv = document.getElementById("tutorPosts");
-        tutorPostsDiv.innerHTML = "";
+    function loadMessages() {
+      if (!currentUser || !currentUser.email) return;
 
-        if(tutors.length === 0){
-            tutorPostsDiv.innerHTML = "<p>No tutor profiles posted yet.</p>";
-        } else {
-            tutors.forEach(t=>{
-            tutorPostsDiv.innerHTML += `
-                <div class="tutor-card" style="background:#e0e7ff; padding:20px; border-radius:10px; border:1.5px solid rgb(131,185,131); text-align:center; margin-bottom:20px;">
-                <img src="https://img.icons8.com/color/96/000000/student-male--v2.png" style="border-radius:50%; height:40px; width:40px; object-fit:cover;">
-                <h3>${t.name}</h3>
-                <p><b>Varsity:</b> ${t.varsity}</p>
-                <p><b>Subject:</b> ${t.subject}</p>
-                <p><b>Location:</b> ${t.location}</p>
-                <p><b>Salary:</b> ${t.salary}</p>
-                </div>
-            `;
-            });
+      const messages = JSON.parse(localStorage.getItem("messages")) || [];
+      const chatListDiv = document.getElementById("chatList");
+      const messageCountSpan = document.getElementById("messageCount");
+      
+      // Filter messages sent TO this tutor
+      const receivedMessages = messages.filter(msg => msg.to === currentUser.email);
+      
+      if (receivedMessages.length === 0) {
+        chatListDiv.innerHTML = '<div class="no-messages">কোনো মেসেজ এখনো আসেনি। Students রা আপনার সাথে যোগাযোগ করলে এখানে দেখা যাবে।</div>';
+        messageCountSpan.style.display = 'none';
+        return;
+      }
+
+      // Group messages by sender
+      const messagesBySender = {};
+      receivedMessages.forEach(msg => {
+        if (!messagesBySender[msg.from]) {
+          messagesBySender[msg.from] = [];
         }
+        messagesBySender[msg.from].push(msg);
+      });
+
+      // Display messages
+      chatListDiv.innerHTML = '';
+      let totalMessages = 0;
+      
+      Object.keys(messagesBySender).forEach(senderEmail => {
+        const senderMessages = messagesBySender[senderEmail].sort((a, b) => new Date(b.at) - new Date(a.at));
+        const latestMessage = senderMessages[0];
+        totalMessages += senderMessages.length;
+        
+        // Try to get sender name from users list
+        const users = JSON.parse(localStorage.getItem("users")) || [];
+        const senderUser = users.find(u => u.email === senderEmail);
+        const senderName = senderUser ? senderUser.name : senderEmail;
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'chat-msg new-message';
+        messageDiv.innerHTML = `
+          <div class="sender">👨‍🎓 ${senderName}</div>
+          <div class="message">"${latestMessage.text}"</div>
+          <div class="time">📅 ${new Date(latestMessage.at).toLocaleString('bn-BD')}</div>
+          <button class="reply-btn" onclick="replyToStudent('${senderEmail}', '${senderName}')">
+            💬 Reply
+          </button>
+        `;
+        
+        chatListDiv.appendChild(messageDiv);
+      });
+
+      // Update message count
+      if (totalMessages > 0) {
+        messageCountSpan.textContent = totalMessages;
+        messageCountSpan.style.display = 'inline-block';
+      } else {
+        messageCountSpan.style.display = 'none';
+      }
     }
 
-    function logout(){
-        localStorage.removeItem("currentUser");
-        window.location.href = "login.html";
+    function replyToStudent(studentEmail, studentName) {
+      // Redirect to chat page with student info
+      const chatUrl = `chat.html?toEmail=${encodeURIComponent(studentEmail)}&toName=${encodeURIComponent(studentName)}`;
+      window.location.href = chatUrl;
     }
-    </script>
 
+    function showTutorPosts() {
+      const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
+      const tutorPostsDiv = document.getElementById("tutorPosts");
+      tutorPostsDiv.innerHTML = "";
+
+      if (tutors.length === 0) {
+        tutorPostsDiv.innerHTML = "<p>No tutor profiles posted yet.</p>";
+      } else {
+        tutors.forEach((t) => {
+          tutorPostsDiv.innerHTML += `
+            <div class="tutor-card" style="background:#e0e7ff; padding:20px; border-radius:10px; border:1.5px solid rgb(131,185,131); text-align:center; margin-bottom:20px;">
+              <img src="https://img.icons8.com/color/96/000000/student-male--v2.png" style="border-radius:50%; height:40px; width:40px; object-fit:cover;">
+              <h3>${t.name}</h3>
+              <p><b>Varsity:</b> ${t.varsity}</p>
+              <p><b>Subject:</b> ${t.subject}</p>
+              <p><b>Location:</b> ${t.location}</p>
+              <p><b>Salary:</b> ${t.salary}</p>
+            </div>
+          `;
+        });
+      }
+    }
+
+    function logout() {
+      // Clear the interval when logging out
+      if (messageCheckInterval) {
+        clearInterval(messageCheckInterval);
+      }
+      localStorage.removeItem("currentUser");
+      window.location.href = "login.html";
+    }
+
+    // Clean up interval when page is closed
+    window.addEventListener('beforeunload', function() {
+      if (messageCheckInterval) {
+        clearInterval(messageCheckInterval);
+      }
+    });
+  </script>
 </body>
 </html>
