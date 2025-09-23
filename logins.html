@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Auth System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-header h1 {
+            color: #333;
+            font-size: 28px;
+            font-weight: 300;
+            margin-bottom: 8px;
+        }
+
+        .auth-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            font-size: 18px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #e1e5e9;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            border-color: #dee2e6;
+        }
+
+        .auth-links {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .auth-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .auth-links a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #b3d7ff;
+        }
+
+        .strength-meter {
+            height: 6px;
+            background: #e1e5e9;
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .strength-meter-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .strength-weak { background: #ff6b6b; }
+        .strength-medium { background: #ffd93d; }
+        .strength-strong { background: #6bcf7f; }
+
+        .otp-input {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .otp-input input {
+            width: 50px !important;
+            height: 50px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .user-dashboard {
+            display: none;
+        }
+
+        .user-dashboard.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #e1e5e9;
+            margin-bottom: 30px;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .dashboard-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .dashboard-menu li {
+            margin-bottom: 15px;
+        }
+
+        .dashboard-menu a {
+            display: block;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            color: #333;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .dashboard-menu a:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .otp-input input {
+                width: 40px !important;
+                height: 40px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Login Form -->
+        <div id="login-section" class="form-section active">
+            <div class="auth-header">
+                <h1>Welcome Back</h1>
+                <p>Sign in to your account</p>
+            </div>
+            
+            <div id="alert-container"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required>
+                    <span class="password-toggle" onclick="togglePassword('login-password')">👁️</span>
+                </div>
+                
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="login-role" required>
+                        <option value="">Select Role</option>
+                        <option value="student">Student</option>
+                        <option value="tutor">Tutor</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+            
+            <div class="auth-links">
+                <a href="#" onclick="showSection('forgot-section')">Forgot Password?</a><br><br>
+                Don't have an account? <a href="#" onclick="showSection('signup-section')">Sign Up</a>
+            </div>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signup-section" class="form-section">
+            <div class="auth-header">
+                <h1>Create Account</h1>
+                <p>Join our learning community</p>
+            </div>
+            
+            <div id="signup-alert-container"></div>
+            
+            <form id="signupForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signup-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="signup-email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signup-password" required oninput="checkPasswordStrength(this.value)">
+                    <span class="password-toggle" onclick="togglePassword('signup-password')">👁️</span>
+                    <div class="strength-meter">
+                        <div class="strength-meter-fill" id="strength-fill"></div>
+                    </div>
+                    <small id="strength-text"></small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="signup-confirm" required>
+                    <span class="password-toggle" onclick="togglePassword('signup-confirm')">👁️</span>
+                </div>
+                
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="signup-role" required>
+                        <option value="">Select Role</option>
+                        <option value="student">Student</option>
+                        <option value="tutor">Tutor</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Create Account</button>
+            </form>
+            
+            <div class="auth-links">
+                Already have an account? <a href="#" onclick="showSection('login-section')">Sign In</a>
+            </div>
+        </div>
+
+        <!-- Forgot Password -->
+        <div id="forgot-section" class="form-section">
+            <div class="auth-header">
+                <h1>Reset Password</h1>
+                <p>Enter your email to receive reset instructions</p>
+            </div>
+            
+            <div id="forgot-alert-container"></div>
+            
+            <form id="forgotForm">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="forgot-email" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Send Reset Link</button>
+                <button type="button" class="btn btn-secondary" onclick="showSection('login-section')">Back to Login</button>
+            </form>
+        </div>
+
+        <!-- OTP Verification -->
+        <div id="otp-section" class="form-section">
+            <div class="auth-header">
+                <h1>Verify Email</h1>
+                <p>Enter the 6-digit code sent to your email</p>
+            </div>
+            
+            <div id="otp-alert-container"></div>
+            
+            <form id="otpForm">
+                <div class="otp-input">
+                    <input type="text" maxlength="1" class="otp-digit" oninput="moveToNext(this, 0)">
+                    <input type="text" maxlength="1" class="otp-digit" oninput="moveToNext(this, 1)">
+                    <input type="text" maxlength="1" class="otp-digit" oninput="moveToNext(this, 2)">
+                    <input type="text" maxlength="1" class="otp-digit" oninput="moveToNext(this, 3)">
+                    <input type="text" maxlength="1" class="otp-digit" oninput="moveToNext(this, 4)">
+                    <input type="text" maxlength="1" class="otp-digit" oninput="moveToNext(this, 5)">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Verify Code</button>
+                <button type="button" class="btn btn-secondary" onclick="resendOTP()">Resend Code</button>
+            </form>
+            
+            <div class="auth-links">
+                <a href="#" onclick="showSection('login-section')">Back to Login</a>
+            </div>
+        </div>
+
+        <!-- Change Password -->
+        <div id="change-password-section" class="form-section">
+            <div class="auth-header">
+                <h1>Change Password</h1>
+                <p>Update your account password</p>
+            </div>
+            
+            <div id="change-password-alert-container"></div>
+            
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" id="current-password" required>
+                    <span class="password-toggle" onclick="togglePassword('current-password')">👁️</span>
+                </div>
+                
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="new-password" required oninput="checkPasswordStrength(this.value)">
+                    <span class="password-toggle" onclick="togglePassword('new-password')">👁️</span>
+                    <div class="strength-meter">
+                        <div class="strength-meter-fill" id="new-strength-fill"></div>
+                    </div>
+                    <small id="new-strength-text"></small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirm-new-password" required>
+                    <span class="password-toggle" onclick="togglePassword('confirm-new-password')">👁️</span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Update Password</button>
+                <button type="button" class="btn btn-secondary" onclick="showSection('dashboard-section')">Cancel</button>
+            </form>
+        </div>
+
+        <!-- User Dashboard -->
+        <div id="dashboard-section" class="form-section">
+            <div class="dashboard-header">
+                <div class="user-avatar" id="user-avatar">U</div>
+                <h2 id="user-name">User Name</h2>
+                <p id="user-role">Role</p>
+            </div>
+            
+            <ul class="dashboard-menu">
+                <li><a href="#" onclick="showSection('change-password-section')">🔒 Change Password</a></li>
+                <li><a href="#" onclick="updateProfile()">👤 Update Profile</a></li>
+                <li><a href="#" onclick="viewSessions()">📱 Active Sessions</a></li>
+                <li><a href="#" onclick="twoFactorAuth()">🔐 Two-Factor Authentication</a></li>
+                <li><a href="#" onclick="logout()">🚪 Logout</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let otpAttempts = 0;
+        let resendTimer = 0;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            checkExistingSession();
+            setupEventListeners();
+        });
+
+        // Check if user is already logged in
+        function checkExistingSession() {
+            const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            if (user && user.isVerified) {
+                currentUser = user;
+                showDashboard();
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Login form
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            
+            // Signup form
+            document.getElementById('signupForm').addEventListener('submit', handleSignup);
+            
+            // Forgot password form
+            document.getElementById('forgotForm').addEventListener('submit', handleForgotPassword);
+            
+            // OTP form
+            document.getElementById('otpForm').addEventListener('submit', handleOTPVerification);
+            
+            // Change password form
+            document.getElementById('changePasswordForm').addEventListener('submit', handleChangePassword);
+        }
+
+        // Show different sections
+        function showSection(sectionId) {
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+            clearAlerts();
+        }
+
+        // Show alerts
+        function showAlert(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+
+        // Clear all alerts
+        function clearAlerts() {
+            document.querySelectorAll('[id$="-alert-container"]').forEach(container => {
+                container.innerHTML = '';
+            });
+        }
+
+        // Toggle password visibility
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const toggle = input.nextElementSibling;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                toggle.textContent = '👁️';
+            }
+        }
+
+        // Check password strength
+        function checkPasswordStrength(password) {
+            const strengthFill = document.getElementById('strength-fill') || document.getElementById('new-strength-fill');
+            const strengthText = document.getElementById('strength-text') || document.getElementById('new-strength-text');
+            
+            if (!strengthFill || !strengthText) return;
+            
+            let strength = 0;
+            let feedback = [];
+            
+            if (password.length >= 8) strength += 25;
+            else feedback.push('At least 8 characters');
+            
+            if (/[a-z]/.test(password)) strength += 25;
+            else feedback.push('Lowercase letter');
+            
+            if (/[A-Z]/.test(password)) strength += 25;
+            else feedback.push('Uppercase letter');
+            
+            if (/\d/.test(password)) strength += 25;
+            else feedback.push('Number');
+            
+            if (/[!@#$%^&*]/.test(password)) strength += 25;
+            else feedback.push('Special character');
+            
+            // Update visual feedback
+            strengthFill.style.width = Math.min(strength, 100) + '%';
+            
+            if (strength < 50) {
+                strengthFill.className = 'strength-meter-fill strength-weak';
+                strengthText.textContent = 'Weak - Missing: ' + feedback.join(', ');
+                strengthText.style.color = '#ff6b6b';
+            } else if (strength < 100) {
+                strengthFill.className = 'strength-meter-fill strength-medium';
+                strengthText.textContent = 'Medium - Missing: ' + feedback.join(', ');
+                strengthText.style.color = '#ffd93d';
+            } else {
+                strengthFill.className = 'strength-meter-fill strength-strong';
+                strengthText.textContent = 'Strong password!';
+                strengthText.style.color = '#6bcf7f';
+            }
+        }
+
+        // Handle login
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const role = document.getElementById('login-role').value;
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.email === email && u.password === password && u.role === role);
+            
+            if (user) {
+                if (!user.isVerified) {
+                    showAlert('alert-container', 'Please verify your email first.', 'error');
+                    currentUser = user;
+                    generateOTP();
+                    showSection('otp-section');
+                    return;
+                }
+                
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                showAlert('alert-container', 'Login successful!', 'success');
+                
+                setTimeout(() => showDashboard(), 1000);
+            } else {
+                showAlert('alert-container', 'Invalid credentials! Please check your email, password, and role.', 'error');
+            }
+        }
+
+        // Handle signup
+        function handleSignup(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm').value;
+            const role = document.getElementById('signup-role').value;
+            
+            // Validation
+            if (password !== confirmPassword) {
+                showAlert('signup-alert-container', 'Passwords do not match!', 'error');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showAlert('signup-alert-container', 'Password must be at least 8 characters long!', 'error');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            if (users.find(u => u.email === email)) {
+                showAlert('signup-alert-container', 'Email already exists!', 'error');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                id: Date.now().toString(),
+                name,
+                email,
+                password,
+                role,
+                isVerified: false,
+                createdAt: new Date().toISOString(),
+                lastLogin: null
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            currentUser = newUser;
+            
+            showAlert('signup-alert-container', 'Account created! Please verify your email.', 'success');
+            generateOTP();
+            
+            setTimeout(() => showSection('otp-section'), 1000);
+        }
+
+        // Handle forgot password
+        function handleForgotPassword(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('forgot-email').value;
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.email === email);
+            
+            if (user) {
+                currentUser = user;
+                generateOTP();
+                showAlert('forgot-alert-container', 'Reset code sent to your email!', 'success');
+                setTimeout(() => showSection('otp-section'), 1000);
+            } else {
+                showAlert('forgot-alert-container', 'Email not found!', 'error');
+            }
+        }
+
+        // Generate OTP (simulated)
+        function generateOTP() {
+            const otp = Math.random().toString().slice(2, 8);
+            sessionStorage.setItem('currentOTP', otp);
+            console.log('OTP Generated:', otp); // In real app, this would be sent via email/SMS
+            showAlert('otp-alert-container', `OTP sent! (Dev mode: ${otp})`, 'info');
+        }
+
+        // Handle OTP verification
+        function handleOTPVerification(e) {
+            e.preventDefault();
+            
+            const otpInputs = document.querySelectorAll('.otp-digit');
+            const enteredOTP = Array.from(otpInputs).map(input => input.value).join('');
+            const correctOTP = sessionStorage.getItem('currentOTP');
+            
+            if (enteredOTP === correctOTP) {
+                // Mark user as verified
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const userIndex = users.findIndex(u => u.email === currentUser.email);
+                
+                if (userIndex !== -1) {
+                    users[userIndex].isVerified = true;
+                    users[userIndex].lastLogin = new Date().toISOString();
+                    localStorage.setItem('users', JSON.stringify(users));
+                    currentUser = users[userIndex];
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                }
+                
+                showAlert('otp-alert-container', 'Verification successful!', 'success');
+                sessionStorage.removeItem('currentOTP');
+                
+                setTimeout(() => showDashboard(), 1000);
+            } else {
+                otpAttempts++;
+                if (otpAttempts >= 3) {
+                    showAlert('otp-alert-container', 'Too many failed attempts. Please try again later.', 'error');
+                    setTimeout(() => showSection('login-section'), 2000);
+                } else {
+                    showAlert('otp-alert-container', `Invalid OTP! ${3 - otpAttempts} attempts remaining.`, 'error');
+                }
+            }
+        }
+
+        // Move to next OTP input
+        function moveToNext(current, index) {
+            if (current.value.length === 1 && index < 5) {
+                document.querySelectorAll('.otp-digit')[index + 1].focus();
+            }
+            
+            if (index === 5 && current.value.length === 1) {
+                // Auto-submit when last digit is entered
+                document.getElementById('otpForm').dispatchEvent(new Event('submit'));
+            }
+        }
+
+        // Resend OTP
+        function resendOTP() {
+            if (resendTimer > 0) return;
+            
+            generateOTP();
+            resendTimer = 60;
+            const resendBtn = document.querySelector('button[onclick="resendOTP()"]');
+            
+            const interval = setInterval(() => {
+                resendBtn.textContent = `Resend Code (${resendTimer}s)`;
+                resendTimer--;
+                
+                if (resendTimer < 0) {
+                    clearInterval(interval);
+                    resendBtn.textContent = 'Resend Code';
+                }
+            }, 1000);
+        }
+
+        // Handle change password
+        function handleChangePassword(e) {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmNewPassword = document.getElementById('confirm-new-password').value;
+            
+            if (currentPassword !== currentUser.password) {
+                showAlert('change-password-alert-container', 'Current password is incorrect!', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmNewPassword) {
+                showAlert('change-password-alert-container', 'New passwords do not match!', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                showAlert('change-password-alert-container', 'Password must be at least 8 characters long!', 'error');
+                return;
+            }
+            
+            // Update password
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userIndex = users.findIndex(u => u.email === currentUser.email);
+            
+            if (userIndex !== -1) {
+                users[userIndex].password = newPassword;
+                localStorage.setItem('users', JSON.stringify(users));
+                currentUser.password = newPassword;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+            
+            showAlert('change-password-alert-container', 'Password updated successfully!', 'success');
+            
+            setTimeout(() => {
+                document.getElementById('changePasswordForm').reset();
+                showSection('dashboard-section');
+            }, 1000);
+        }
+
+        // Show dashboard
+        function showDashboard() {
+            showSection('dashboard-section');
+            
+            // Update dashboard info
+            document.getElementById('user-name').textContent = currentUser.name;
+            document.getElementById('user-role').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+            document.getElementById('user-avatar').textContent = currentUser.name.charAt(0).toUpperCase();
+        }
+
+        // Dashboard functions (placeholder implementations)
+        function updateProfile() {
+            alert('Profile update feature - Coming soon!');
+        }
+
+        function viewSessions() {
+            alert('Active sessions:\n• Current session (Web Browser)\n• Last login: ' + new Date(currentUser.lastLogin).toLocaleString());
+        }
+
+        function twoFactorAuth() {
+            alert('Two-factor authentication setup - Coming soon!\nThis will add an extra layer of security to your account.');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                sessionStorage.clear();
+                currentUser = null;
+                showSection('login-section');
+                showAlert('alert-container', 'Logged out successfully!', 'info');
+            }
+        }
+
+        // Utility functions
+        function validateEmail(email) {
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailPattern.test(email);
+        }
+
+        function sanitizeInput(input) {
+            return input.trim().replace(/[<>]/g, '');
+        }
+
+        // Auto-logout after inactivity (30 minutes)
+        let inactivityTimer;
+        
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            if (currentUser) {
+                inactivityTimer = setTimeout(() => {
+                    alert('Session expired due to inactivity. Please login again.');
+                    logout();
+                }, 30 * 60 * 1000); // 30 minutes
+            }
+        }
+
+        // Reset timer on user activity
+        document.addEventListener('click', resetInactivityTimer);
+        document.addEventListener('keypress', resetInactivityTimer);
+
+        // Prevent common security issues
+        window.addEventListener('beforeunload', function() {
+            if (currentUser) {
+                // Clear sensitive session data on page unload
+                sessionStorage.removeItem('currentOTP');
+            }
+        });
+
+        // Simple rate limiting for login attempts
+        function checkRateLimit(email) {
+            const attempts = JSON.parse(localStorage.getItem('loginAttempts') || '{}');
+            const now = Date.now();
+            const userAttempts = attempts[email] || { count: 0, lastAttempt: 0 };
+            
+            // Reset after 15 minutes
+            if (now - userAttempts.lastAttempt > 15 * 60 * 1000) {
+                userAttempts.count = 0;
+            }
+            
+            if (userAttempts.count >= 5) {
+                return false; // Rate limited
+            }
+            
+            userAttempts.count++;
+            userAttempts.lastAttempt = now;
+            attempts[email] = userAttempts;
+            localStorage.setItem('loginAttempts', JSON.stringify(attempts));
+            
+            return true;
+        }
+    </script>
+</body>
+</html>
