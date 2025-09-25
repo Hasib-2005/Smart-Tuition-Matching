@@ -187,11 +187,12 @@
         <div id="chatList"></div>
     </div>
 
-    <script>
-        let currentUser;
-        let messageCheckInterval;
+    <!-- tutor.html main script -->
+<script>
+    let currentUser;
+    let messageCheckInterval;
 
-        window.onload = function () {
+    window.onload = function () {
         currentUser = JSON.parse(localStorage.getItem("currentUser"));
         if (!currentUser) {
             alert("Please login as a tutor to access this page.");
@@ -199,169 +200,102 @@
             return;
         }
 
-        // Role-based nav hide
-        if (currentUser.role === "student") {
-            const tutorLink = document.querySelector('a[href="tutor.html"]');
-            if (tutorLink) tutorLink.style.display = "none";
-        }
-        if (currentUser.role === "tutor") {
-            const studentLink = document.querySelector('a[href="student.html"]');
-            if (studentLink) studentLink.style.display = "none";
-        }
-
         showTutorPosts();
-        loadMessages(); // Load messages immediately
-        
-        // Check for new messages every 2 seconds
+        loadMessages();
+
         messageCheckInterval = setInterval(loadMessages, 2000);
 
-        // Listen for storage changes (when new messages arrive)
         window.addEventListener('storage', function(e) {
             if (e.key === 'messages') {
-            loadMessages();
+                loadMessages();
             }
         });
 
-        document
-            .getElementById("tutorForm")
-            .addEventListener("submit", function (e) {
-            e.preventDefault();
+        window.addEventListener('beforeunload', function() {
+            markMessagesRead();
+            if (messageCheckInterval) clearInterval(messageCheckInterval);
+        });
+    };
 
-            const name = document.getElementById("name").value.trim();
-            const varsity = document.getElementById("varsity").value.trim();
-            const subject = document.getElementById("subject").value;
-            const location = document.getElementById("location").value;
-            const salary = document.getElementById("salary").value;
-
-            const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
-
-            // ✅ Save tutor email alongside profile so students can route to chat.html
-            tutors.push({
-                name,
-                varsity,
-                subject,
-                location,
-                salary,
-                email: currentUser.email || ""
-            });
-            localStorage.setItem("tutors", JSON.stringify(tutors));
-
-            // Keep currentUser.name in sync with tutor profile name
-            currentUser.name = name;
-            localStorage.setItem("currentUser", JSON.stringify(currentUser));
-
-            document.getElementById("msg").innerHTML =
-                "<p style='color:green;'>✅ Profile posted!</p>";
-            document.getElementById("tutorForm").reset();
-
-            showTutorPosts();
-            });
-        };
-        function loadMessages() {
+    function loadMessages() {
         if (!currentUser || !currentUser.email) return;
 
         const messages = JSON.parse(localStorage.getItem("messages")) || [];
+        const readMessages = JSON.parse(localStorage.getItem(`readMessages_${currentUser.email}`)) || {};
         const chatListDiv = document.getElementById("chatList");
         const messageCountSpan = document.getElementById("messageCount");
-        
-        // Filter messages sent TO this tutor
-        const receivedMessages = messages.filter(msg => msg.to === currentUser.email);
-        
+
+        const receivedMessages = messages.filter(m => m.to === currentUser.email);
+
         if (receivedMessages.length === 0) {
-            chatListDiv.innerHTML = '<div class="no-messages">কোনো মেসেজ এখনো আসেনি। Students রা আপনার সাথে যোগাযোগ করলে এখানে দেখা যাবে।</div>';
+            chatListDiv.innerHTML = '<div class="no-messages">কোনো মেসেজ এখনও আসেনি। Students রা আপনার সাথে যোগাযোগ করলে এখানে দেখা যাবে।</div>';
             messageCountSpan.style.display = 'none';
             return;
         }
 
-        // Group messages by sender
         const messagesBySender = {};
         receivedMessages.forEach(msg => {
-            if (!messagesBySender[msg.from]) {
-            messagesBySender[msg.from] = [];
-            }
+            if (!messagesBySender[msg.from]) messagesBySender[msg.from] = [];
             messagesBySender[msg.from].push(msg);
         });
 
-        // Display messages
         chatListDiv.innerHTML = '';
-        let totalMessages = 0;
-        
+        let totalUnread = 0;
+
         Object.keys(messagesBySender).forEach(senderEmail => {
             const senderMessages = messagesBySender[senderEmail].sort((a, b) => new Date(b.at) - new Date(a.at));
             const latestMessage = senderMessages[0];
-            totalMessages += senderMessages.length;
-            
-            // Try to get sender name from users list
+
+            let unreadCount = senderMessages.filter(m => !(readMessages[m.id])).length;
+            totalUnread += unreadCount;
+
             const users = JSON.parse(localStorage.getItem("users")) || [];
             const senderUser = users.find(u => u.email === senderEmail);
             const senderName = senderUser ? senderUser.name : senderEmail;
-            
+
             const messageDiv = document.createElement('div');
             messageDiv.className = 'chat-msg new-message';
             messageDiv.innerHTML = `
-            <div class="sender">👨‍🎓 ${senderName}</div>
-            <div class="message">"${latestMessage.text}"</div>
-            <div class="time">📅 ${new Date(latestMessage.at).toLocaleString('bn-BD')}</div>
-            <button class="reply-btn" onclick="replyToStudent('${senderEmail}', '${senderName}')">
-                💬 Reply
-            </button>
+                <div class="sender">👨‍🎓 ${senderName} ${unreadCount > 0 ? `<span class="message-count">${unreadCount}</span>` : ''}</div>
+                <div class="message">"${latestMessage.text}"</div>
+                <div class="time">📅 ${new Date(latestMessage.at).toLocaleString('bn-BD')}</div>
+                <button class="reply-btn" onclick="replyToStudent('${encodeURIComponent(senderEmail)}', '${encodeURIComponent(senderName)}')">
+                    💬 Reply
+                </button>
             `;
-            
             chatListDiv.appendChild(messageDiv);
         });
 
-        // Update message count
-        if (totalMessages > 0) {
-            messageCountSpan.textContent = totalMessages;
+        if (totalUnread > 0) {
+            messageCountSpan.textContent = totalUnread;
             messageCountSpan.style.display = 'inline-block';
         } else {
             messageCountSpan.style.display = 'none';
         }
-        }
+    }
 
-        function replyToStudent(studentEmail, studentName) {
-        // Redirect to chat page with student info
+    function markMessagesRead() {
+        if (!currentUser || !currentUser.email) return;
+        const messages = JSON.parse(localStorage.getItem("messages")) || [];
+        const readMessages = JSON.parse(localStorage.getItem(`readMessages_${currentUser.email}`)) || {};
+
+        messages.forEach(m => {
+            if (m.to === currentUser.email) {
+                readMessages[m.id] = true;
+            }
+        });
+
+        localStorage.setItem(`readMessages_${currentUser.email}`, JSON.stringify(readMessages));
+    }
+
+    function replyToStudent(studentEmailEncoded, studentNameEncoded) {
+        const studentEmail = decodeURIComponent(studentEmailEncoded);
+        const studentName = decodeURIComponent(studentNameEncoded);
+        markMessagesRead();
         const chatUrl = `chat.html?toEmail=${encodeURIComponent(studentEmail)}&toName=${encodeURIComponent(studentName)}`;
         window.location.href = chatUrl;
-        }
+    }
+</script>
 
-        function showTutorPosts() {
-        const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
-        const tutorPostsDiv = document.getElementById("tutorPosts");
-        tutorPostsDiv.innerHTML = "";
-
-        if (tutors.length === 0) {
-            tutorPostsDiv.innerHTML = "<p>No tutor profiles posted yet.</p>";
-        } else {
-            tutors.forEach((t) => {
-            tutorPostsDiv.innerHTML += `
-                <div class="tutor-card" style="background:#e0e7ff; padding:20px; border-radius:10px; border:1.5px solid rgb(131,185,131); text-align:center; margin-bottom:20px;">
-                <img src="https://img.icons8.com/color/96/000000/student-male--v2.png" style="border-radius:50%; height:40px; width:40px; object-fit:cover;">
-                <h3>${t.name}</h3>
-                <p><b>Varsity:</b> ${t.varsity}</p>
-                <p><b>Subject:</b> ${t.subject}</p>
-                <p><b>Location:</b> ${t.location}</p>
-                <p><b>Salary:</b> ${t.salary}</p>
-                </div>
-            `;
-            });
-        }
-        }
-
-        function logout() {
-        // Clear the interval when logging out
-        if (messageCheckInterval) {
-            clearInterval(messageCheckInterval);
-        }
-        localStorage.removeItem("currentUser");
-        window.location.href = "login.html";
-        }
-        // Clean up interval when page is closed
-        window.addEventListener('beforeunload', function() {
-        if (messageCheckInterval) {
-            clearInterval(messageCheckInterval);
-        }
-        });
-    </script>
 </body>
 </html>
