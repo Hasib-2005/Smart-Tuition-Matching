@@ -3,12 +3,569 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tuition website</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Smart Tuition Media</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #1a202c;
+            background: #0f0f23;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Gradient Background */
+        .bg-gradient {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #4facfe);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float-up 15s infinite ease-in;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        header {
+            background: rgba(15, 15, 35, 0.95);
+            padding: 1.2rem 5%;
+            box-shadow: 0 4px 30px rgba(102, 126, 234, 0.3);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            border-bottom: 2px solid rgba(102, 126, 234, 0.5);
+        }
+
+        header h2 {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #ffd140 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-shadow: 0 0 30px rgba(240, 147, 251, 0.5);
+        }
+
+        .navi {
+            float: right;
+            margin-top: 8px;
+        }
+
+        .navi a {
+            text-decoration: none;
+            color: #fff;
+            margin-left: 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .navi a:hover {
+            color: #f093fb;
+            transform: translateY(-2px);
+            text-shadow: 0 0 20px rgba(240, 147, 251, 0.8);
+        }
+
+        .navi a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: -5px;
+            left: 50%;
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            transition: all 0.3s ease;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(240, 147, 251, 0.8);
+        }
+
+        .navi a:hover::after {
+            width: 100%;
+            left: 0;
+        }
+
+        #main {
+            padding-top: 100px;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        #part1 {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+            border-radius: 30px;
+            padding: 4rem;
+            margin: 2rem 5%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(240, 147, 251, 0.4),
+                        0 0 100px rgba(102, 126, 234, 0.3),
+                        inset 0 0 50px rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.8s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #part1::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        #part1::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .topimage-img {
+            width: 90px;
+            height: 90px;
+            margin-bottom: 1.5rem;
+            animation: bounce 2s infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        #p1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5),
+                         0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        #p2 {
+            font-size: 1.5rem;
+            color: #ffd140;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 20px rgba(255, 209, 64, 0.6),
+                         0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        #p3 {
+            font-size: 1.15rem;
+            color: rgba(255, 255, 255, 0.95);
+            max-width: 650px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.8;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .bt {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 1.3rem 3.5rem;
+            margin: 0.7rem;
+            font-size: 1.15rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.5),
+                        0 0 50px rgba(240, 147, 251, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .bt::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .bt:hover::before {
+            left: 100%;
+        }
+
+        .bt:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(245, 87, 108, 0.7),
+                        0 0 60px rgba(240, 147, 251, 0.5);
+        }
+
+        .bt:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        #part2 {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            margin: 4rem 5%;
+            flex-wrap: wrap;
+            animation: fadeIn 1s ease 0.3s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .box {
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.9) 0%, rgba(245, 87, 108, 0.9) 100%);
+            border-radius: 25px;
+            padding: 3rem 3.5rem;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(240, 147, 251, 0.4),
+                        0 0 100px rgba(245, 87, 108, 0.2),
+                        inset 0 0 50px rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            flex: 1;
+            min-width: 250px;
+            max-width: 350px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 15s linear infinite;
+        }
+
+        .box:hover {
+            transform: translateY(-15px) scale(1.05);
+            box-shadow: 0 25px 60px rgba(240, 147, 251, 0.6),
+                        0 0 120px rgba(245, 87, 108, 0.4);
+        }
+
+        .box img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+            transition: transform 0.4s ease;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6));
+            position: relative;
+            z-index: 1;
+        }
+
+        .box:hover img {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .box p:first-of-type {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+            margin: 0.8rem 0;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.6),
+                         0 4px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .box p:last-of-type {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.95);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        #middle {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+            margin: 5rem 0 3rem;
+            text-shadow: 0 0 30px rgba(255, 209, 64, 0.8),
+                         0 4px 10px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1s ease 0.5s both;
+        }
+
+        #part3 {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 5%;
+            flex-wrap: wrap;
+            animation: fadeIn 1s ease 0.7s both;
+        }
+
+        .picbox {
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.9) 0%, rgba(0, 242, 254, 0.9) 100%);
+            border-radius: 25px;
+            padding: 2.5rem 1.8rem;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(79, 172, 254, 0.4),
+                        0 0 80px rgba(0, 242, 254, 0.2),
+                        inset 0 0 50px rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 230px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .picbox::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 12s linear infinite;
+        }
+
+        .picbox:hover {
+            transform: translateY(-12px) scale(1.05);
+            box-shadow: 0 25px 60px rgba(79, 172, 254, 0.6),
+                        0 0 100px rgba(0, 242, 254, 0.4);
+        }
+
+        .picbox img {
+            width: 95px;
+            height: 95px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.2rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.6),
+                        0 8px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .picbox:hover img {
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.8),
+                        0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .picbox h4 {
+            font-size: 1.05rem;
+            color: #fff;
+            margin-bottom: 0.7rem;
+            min-height: 45px;
+            line-height: 1.4;
+            font-weight: 700;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .picbox p {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 600;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        #part4 {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+            margin-top: 5rem;
+            padding: 4rem 5%;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 3rem;
+            box-shadow: 0 -20px 50px rgba(102, 126, 234, 0.3),
+                        inset 0 0 100px rgba(255, 255, 255, 0.05);
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .no {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .no h3 {
+            color: #ffd140;
+            font-size: 1.6rem;
+            margin-bottom: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 800;
+            text-shadow: 0 0 20px rgba(255, 209, 64, 0.6),
+                         0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .no p {
+            color: rgba(255, 255, 255, 0.95);
+            margin: 0.7rem 0;
+            font-size: 1.05rem;
+            font-weight: 500;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            header h2 {
+                font-size: 1.4rem;
+                display: block;
+                text-align: center;
+            }
+
+            .navi {
+                float: none;
+                text-align: center;
+                margin-top: 1rem;
+            }
+
+            .navi a {
+                margin: 0 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            #p1 {
+                font-size: 2rem;
+            }
+
+            #p2 {
+                font-size: 1.2rem;
+            }
+
+            #part1 {
+                padding: 2.5rem 1.5rem;
+            }
+
+            .bt {
+                display: block;
+                width: 100%;
+                margin: 0.7rem 0;
+            }
+
+            #middle {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="bg-gradient"></div>
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 40%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 2.5s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 4.5s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 1.5s;"></div>
+    </div>
+
     <header>
-        <h2 style="letter-spacing: 1.5px;">Smart Tuition Media</h2>
+        <h2>Smart Tuition Media</h2>
         <nav class="navi">
             <a href="index.html">Home</a>
             <a href="about.html">About</a>
@@ -18,34 +575,31 @@
             <a href="#" id="logoutBtn" style="display:none;" onclick="logout()">Logout</a>
         </nav>
     </header>
-    <div id="fake">
-        <!-- ফাকা জায়গা বানানো যাতে ফিক্সড বার এর নিচে সব ঢেকে না যায়  -->
-    </div>
+
     <div id="main">
         <div id="part1">
             <img src="https://img.icons8.com/color/96/000000/student-male--v2.png" class="topimage-img">
-            <p id="p1">Find Your Perfect Tutor or <br>
-            Student </p> <br>
-            <p id="p2">Country's #1 Tutor Matching & <br>
-            Learning Platform.</p> <br> <br>
+            <p id="p1">Find Your Perfect Tutor or<br>Student</p>
+            <p id="p2">Country's #1 Tutor Matching &<br>Learning Platform</p>
             <p id="p3">Hire a conversant tutor to make your children's learning fun, comprehensive & easier.</p>
             <button class="bt" onclick="goToPage('tutor')">I am a teacher</button>
             <button class="bt" onclick="goToPage('student')">I am a student</button>
         </div>
+
         <div id="part2">
-            <div id="box1" class="box">
+            <div class="box">
                 <img src="https://img.icons8.com/color/96/000000/student-male--v2.png">
                 <p id="totalTutors">0</p>
                 <p>total tutors</p>
             </div>
-            <div id="box2" class="box">
+            <div class="box">
                 <img src="https://img.icons8.com/color/96/000000/book.png">
-                <p id="para">120+</p>
+                <p>120+</p>
                 <p>successful matches</p>
             </div>
-            <div id="box3" class="box">
+            <div class="box">
                 <img src="https://img.icons8.com/color/96/000000/pencil--v2.png">
-                <p id="para">4.9/5</p>
+                <p>4.9/5</p>
                 <p>Avg. Tutor Rating</p>
             </div>
         </div>
@@ -54,31 +608,32 @@
 
         <div id="part3">
             <div class="picbox">
-                <img src="hasib copy.jpg" style="width: 65px; height: 65px;">
-                <h4 style="padding-top: 13px;"> Mohammod Hasibur Rahman</h4>
-                <p> B.Sc(CSE, SUST)</p>
+                <img src="hasib copy.jpg" alt="Admin">
+                <h4>Mohammad Hasibur Rahman</h4>
+                <p>B.Sc(CSE, SUST)</p>
             </div>
             <div class="picbox">
-                <img src="tithi.avif" style="width: 65px; height: 65px;"><br>         
-                <h4 style="padding-top: 13px;"> Tithi Rani <br>Das</h4>
-                <p> B.Sc(CSE, SUST)</p>
+                <img src="tithi.avif" alt="Admin">
+                <h4>Tithi Rani Das</h4>
+                <p>B.Sc(CSE, SUST)</p>
             </div>
             <div class="picbox">
-                <img src="siam.jpg" style="width: 65px; height: 65px;">
-                <h4 style="padding-top: 13px;"> Toufiqul Hossain <br>Siam</h4>
-                <p> B.Sc(CSE, SUST)</p>
+                <img src="siam.jpg" alt="Admin">
+                <h4>Toufiqul Hossain Siam</h4>
+                <p>B.Sc(CSE, SUST)</p>
             </div>
-            <div  class="picbox">
-                <img src="ishmam.jpg" style="width: 65px; height: 65px;">
-                <h4 style="padding-top: 13px;" >Syed Ishmamul <br>Hauqe</h4>
-                <p> B.Sc(CSE, SUST)</p>
+            <div class="picbox">
+                <img src="ishmam.jpg" alt="Admin">
+                <h4>Syed Ishmamul Hauqe</h4>
+                <p>B.Sc(CSE, SUST)</p>
             </div>
-            <div  class="picbox">
-                <img src="sami.jpg" style="width: 65px; height: 65px;">
-                <h4 style="padding-top: 13px;" > Arman Nesar <br>Samy</h4>
-                <p> B.Sc(CSE, SUST)</p>
+            <div class="picbox">
+                <img src="sami.jpg" alt="Admin">
+                <h4>Arman Nesar Samy</h4>
+                <p>B.Sc(CSE, SUST)</p>
             </div>
         </div>
+
         <div id="part4">
             <div class="no">
                 <h3>Smart tuition media</h3>
@@ -98,9 +653,9 @@
 
             if(!user){
                 if(role === "student"){
-                alert("Please login as a student to access this page.");
+                    alert("Please login as a student to access this page.");
                 } else if(role === "tutor"){
-                alert("Please login as a tutor to access this page.");
+                    alert("Please login as a tutor to access this page.");
                 }
                 window.location.href = "login.html";
                 return;
@@ -108,9 +663,9 @@
 
             if(user.role === role){
                 if(role === "student"){
-                window.location.href = "student.html";
+                    window.location.href = "student.html";
                 } else if(role === "tutor"){
-                window.location.href = "tutor.html";
+                    window.location.href = "tutor.html";
                 }
             } 
             else {
@@ -138,6 +693,5 @@
             window.location.href = "login.html";
         }
     </script>
-
 </body>
 </html>
