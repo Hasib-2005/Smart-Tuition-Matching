@@ -53,6 +53,8 @@
       color: white;
       border-radius: 12px;
       cursor: pointer;
+      margin: 5px;
+      padding: 10px 20px;
     }
   </style>
 </head>
@@ -84,7 +86,7 @@
       </select>
 
       <select id="location">
-        <option value="">Select Location</option>
+        <option value=""> Any Location </option>
         <option>Surma</option><option>Akhalia</option><option>Amborkhana</option>
         <option>Zindabazar</option><option>Madina Market</option><option>Shibganj</option>
         <option>Tilagor</option><option>Kumarpara</option><option>Lama Bazar</option>
@@ -109,6 +111,12 @@
 
       <button type="submit">Search</button>
     </form>
+
+    <div style="text-align: center; margin-top: 15px; padding: 10px; background: #fef2f2; border-radius: 8px; border-left: 4px solid #ef4444;">
+      <p style="color: #dc2626; font-size: 14px; margin: 0;">
+        <strong>N.B:</strong> If no tutor is found in your selected Location, then set the Location to <strong>"Any Location"</strong> and Search Again.
+      </p>
+    </div>
 
     <div id="results"></div>
   </div>
@@ -153,7 +161,8 @@
             <p><b>Subject:</b> ${t.subject}</p>
             <p><b>Location:</b> ${t.location}</p>
             <p><b>Salary:</b> ${t.salary}</p>
-            <button onclick="handleChat('${encodeURIComponent(t.name)}','${encodeURIComponent(safeEmail)}')">Chat Now</button>
+            <button onclick="viewProfile('${encodeURIComponent(t.name)}','${encodeURIComponent(safeEmail)}')">View Profile</button>
+            <button onclick="handleChat('${encodeURIComponent(t.name)}','${encodeURIComponent(safeEmail)}')">Chat</button>
           </div>
         `;
       });
@@ -191,7 +200,20 @@
       }
     });
 
-    // ✅ New: go straight to chat.html with target user info
+    // View tutor profile
+    function viewProfile(encodedTutorName, encodedTutorEmail){
+      const user = JSON.parse(localStorage.getItem("currentUser"));
+      if (!user){
+        alert("Please login first.");
+        window.location.href = "login.html";
+        return;
+      }
+      const hasEmail = encodedTutorEmail && decodeURIComponent(encodedTutorEmail) !== "";
+      const q = `tutor-profile.html?name=${encodedTutorName}` + (hasEmail ? `&email=${encodedTutorEmail}` : "");
+      window.location.href = q;
+    }
+
+    // Go to chat page
     function handleChat(encodedTutorName, encodedTutorEmail){
       const user = JSON.parse(localStorage.getItem("currentUser"));
       if (!user){
