@@ -80,8 +80,11 @@ const activeMetaSmall = document.getElementById('activeMeta');
 const inputEl = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
 
+const VISIBLE_BATCH = 10;
 let activePeerEmail = null;
 let activePeerName = null;
+let currentThreadMessages = [];
+let visibleStartIndex = 0;
 
 function initializeDefaultUsers() {
     let users = JSON.parse(localStorage.getItem('users') || '[]');
@@ -157,12 +160,15 @@ function renderThread(){
         messagesDiv.innerHTML = '<div style="text-align:center; color:#6b7280; margin-top:50px;">Select a conversation to start chatting</div>';
         activeTitleSpan.textContent = 'Select a conversation';
         activeMetaSmall.textContent = '';
+        currentThreadMessages = [];
+        visibleStartIndex = 0;
         return;
     }
 
     const all = getAllMessages();
     const key = getThreadKey(currentUser.email, activePeerEmail);
     const thread = all.filter(m => getThreadKey(m.from, m.to) === key);
+    currentThreadMessages = thread;
 
     let users = JSON.parse(localStorage.getItem('users') || '[]');
     let peerUser = users.find(u => u.email === activePeerEmail);
@@ -171,18 +177,14 @@ function renderThread(){
     activeTitleSpan.textContent = activePeerName;
     activeMetaSmall.textContent = peerUser ? peerUser.role : '';
 
-    messagesDiv.innerHTML = '';
     if(thread.length === 0){
         messagesDiv.innerHTML = '<div style="text-align:center; color:#6b7280; margin-top:50px;">No messages yet. Start the conversation!</div>';
-    } else {
-        thread.forEach(m => {
-            let bubble = document.createElement('div');
-            bubble.className = 'msg ' + (m.from === currentUser.email ? 'fromMe' : 'fromThem');
-            bubble.textContent = m.text;
-            messagesDiv.appendChild(bubble);
-        });
+        visibleStartIndex = 0;
+        return;
     }
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    visibleStartIndex = Math.max(0, thread.length - VISIBLE_BATCH);
+    renderVisibleMessages({ scrollToBottom: true });
 }
 
 function openConversation(peerEmail){
@@ -235,11 +237,48 @@ function updateChatBadge(){
     let count = all.filter(m => m.to === currentUser.email && new Date(m.at).getTime() > lastSeen).length;
     badge.style.display = count > 0 ? 'inline-block' : 'none';
     if(count > 0) badge.textContent = count;
+
+    if(count > 0){
+        localStorage.setItem('hasNewChatMessage', 'true');
+    } else {
+        localStorage.setItem('hasNewChatMessage', 'false');
+    }
 }
 
 function logout() {
     localStorage.removeItem('currentUser');
     window.location.href = 'login.html';
+}
+
+function renderVisibleMessages(options = {}){
+    const { scrollToBottom = false, preserveTop = false, previousHeight = 0 } = options;
+    messagesDiv.innerHTML = '';
+
+    if(currentThreadMessages.length === 0){
+        messagesDiv.innerHTML = '<div style="text-align:center; color:#6b7280; margin-top:50px;">No messages yet. Start the conversation!</div>';
+        return;
+    }
+
+    const visibleMessages = currentThreadMessages.slice(visibleStartIndex);
+    visibleMessages.forEach(m => {
+        let bubble = document.createElement('div');
+        bubble.className = 'msg ' + (m.from === currentUser.email ? 'fromMe' : 'fromThem');
+        bubble.textContent = m.text;
+        messagesDiv.appendChild(bubble);
+    });
+
+    if(scrollToBottom){
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    } else if(preserveTop){
+        messagesDiv.scrollTop = messagesDiv.scrollHeight - previousHeight;
+    }
+}
+
+function loadOlderMessages(){
+    if(visibleStartIndex === 0) return;
+    const previousHeight = messagesDiv.scrollHeight;
+    visibleStartIndex = Math.max(0, visibleStartIndex - VISIBLE_BATCH);
+    renderVisibleMessages({ preserveTop: true, previousHeight });
 }
 
 window.addEventListener('storage', function(e) {
@@ -259,6 +298,12 @@ inputEl.addEventListener('keydown', e => {
     if(e.key === 'Enter'){
         e.preventDefault();
         sendMessage();
+    }
+});
+
+messagesDiv.addEventListener('scroll', () => {
+    if(messagesDiv.scrollTop === 0 && visibleStartIndex > 0){
+        loadOlderMessages();
     }
 });
 
