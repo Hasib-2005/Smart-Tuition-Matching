@@ -38,6 +38,53 @@
     }
     button:hover { background: #28845c; }
     #msg { margin-top: 10px; text-align: center; font-weight: bold; }
+    #tutorPosts {
+    width: 60%;
+    margin: 30px auto;
+    }
+    .profile-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    }
+    .profile-card h3 {
+    color: #1e293b;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #6366f1;
+    padding-bottom: 10px;
+    }
+    .profile-card p {
+    margin: 8px 0;
+    color: #374151;
+    line-height: 1.6;
+    }
+    .profile-card strong {
+    color: #6366f1;
+    }
+    .profile-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    }
+    .profile-actions button {
+    width: auto;
+    padding: 8px 20px;
+    font-size: 14px;
+    }
+    .btn-edit {
+    background: #f59e0b;
+    }
+    .btn-edit:hover {
+    background: #d97706;
+    }
+    .btn-delete {
+    background: #ef4444;
+    }
+    .btn-delete:hover {
+    background: #dc2626;
+    }
     #inbox {
     width: 60%;
     margin: 30px auto;
@@ -179,7 +226,8 @@
         <div id="msg"></div>
     </div>
 
-    <div id="tutorPosts" style="width:60%; margin:30px auto;"></div>
+    <!-- Show Tutor's Posted Profile -->
+    <div id="tutorPosts"></div>
 
     <!-- 📥 Enhanced Inbox with proper SMS receiving functionality -->
     <div id="inbox">
@@ -187,8 +235,7 @@
         <div id="chatList"></div>
     </div>
 
-    <!-- tutor.html main script -->
-<script>
+    <script>
     let currentUser;
     let messageCheckInterval;
 
@@ -200,7 +247,13 @@
             return;
         }
 
+        // Pre-fill form if tutor already posted
+        prefillForm();
+        
+        // Show existing posts
         showTutorPosts();
+        
+        // Load messages
         loadMessages();
 
         messageCheckInterval = setInterval(loadMessages, 2000);
@@ -216,6 +269,121 @@
             if (messageCheckInterval) clearInterval(messageCheckInterval);
         });
     };
+
+    // Pre-fill form with existing tutor data
+    function prefillForm() {
+        const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
+        const myProfile = tutors.find(t => t.email === currentUser.email);
+        
+        if (myProfile) {
+            document.getElementById("name").value = myProfile.name || "";
+            document.getElementById("varsity").value = myProfile.varsity || "";
+            document.getElementById("subject").value = myProfile.subject || "";
+            document.getElementById("location").value = myProfile.location || "";
+            document.getElementById("salary").value = myProfile.salary || "";
+        }
+    }
+
+    // ✅ Handle form submission - Save tutor profile
+    document.getElementById("tutorForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById("name").value.trim();
+        const varsity = document.getElementById("varsity").value.trim();
+        const subject = document.getElementById("subject").value;
+        const location = document.getElementById("location").value;
+        const salary = document.getElementById("salary").value;
+
+        if (!name || !varsity || !subject || !location || !salary) {
+            document.getElementById("msg").innerHTML = '<span style="color:red;">❌ All fields are required!</span>';
+            return;
+        }
+
+        const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
+        
+        // Check if tutor already exists
+        const existingIndex = tutors.findIndex(t => t.email === currentUser.email);
+        
+        const tutorData = {
+            name: name,
+            email: currentUser.email,
+            varsity: varsity,
+            subject: subject,
+            location: location,
+            salary: salary,
+            postedAt: new Date().toISOString()
+        };
+
+        if (existingIndex !== -1) {
+            // Update existing profile
+            tutors[existingIndex] = tutorData;
+            document.getElementById("msg").innerHTML = '<span style="color:green;">✅ Profile updated successfully!</span>';
+        } else {
+            // Add new profile
+            tutors.push(tutorData);
+            document.getElementById("msg").innerHTML = '<span style="color:green;">✅ Profile posted successfully!</span>';
+        }
+
+        // Save to localStorage
+        localStorage.setItem("tutors", JSON.stringify(tutors));
+        
+        setTimeout(() => {
+            document.getElementById("msg").innerHTML = '';
+            showTutorPosts();
+        }, 2000);
+    });
+
+    // ✅ Show tutor's own posted profile
+    function showTutorPosts() {
+        const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
+        const myProfile = tutors.find(t => t.email === currentUser.email);
+        const postsDiv = document.getElementById("tutorPosts");
+
+        if (!myProfile) {
+            postsDiv.innerHTML = '<div style="text-align:center;color:#6b7280;padding:20px;">You haven\'t posted your profile yet. Fill the form above to create your profile.</div>';
+            return;
+        }
+
+        postsDiv.innerHTML = `
+            <div class="profile-card">
+                <h3>📋 Your Posted Profile</h3>
+                <p><strong>Name:</strong> ${myProfile.name}</p>
+                <p><strong>University:</strong> ${myProfile.varsity}</p>
+                <p><strong>Subject:</strong> ${myProfile.subject}</p>
+                <p><strong>Location:</strong> ${myProfile.location}</p>
+                <p><strong>Salary:</strong> ৳${myProfile.salary}/month</p>
+                <p style="font-size:12px;color:#6b7280;margin-top:10px;">Posted: ${new Date(myProfile.postedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                
+                <div class="profile-actions">
+                    <button class="btn-edit" onclick="editProfile()">✏️ Edit Profile</button>
+                    <button class="btn-delete" onclick="deleteProfile()">🗑️ Delete Profile</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Edit profile - scroll to form
+    function editProfile() {
+        document.getElementById("post-box").scrollIntoView({ behavior: 'smooth' });
+        document.getElementById("name").focus();
+    }
+
+    // Delete profile
+    function deleteProfile() {
+        if (!confirm("Are you sure you want to delete your profile?")) return;
+        
+        const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
+        const filtered = tutors.filter(t => t.email !== currentUser.email);
+        localStorage.setItem("tutors", JSON.stringify(filtered));
+        
+        // Clear form
+        document.getElementById("tutorForm").reset();
+        
+        // Refresh display
+        showTutorPosts();
+        
+        alert("Profile deleted successfully!");
+    }
 
     function loadMessages() {
         if (!currentUser || !currentUser.email) return;
@@ -294,6 +462,11 @@
         markMessagesRead();
         const chatUrl = `chat.html?toEmail=${encodeURIComponent(studentEmail)}&toName=${encodeURIComponent(studentName)}`;
         window.location.href = chatUrl;
+    }
+
+    function logout() {
+        localStorage.removeItem("currentUser");
+        window.location.href = "login.html";
     }
 </script>
 
