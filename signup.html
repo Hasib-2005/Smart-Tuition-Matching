@@ -5,83 +5,293 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Signup</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- EmailJS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script>
+        // Initialize EmailJS with your PUBLIC KEY
+        window.addEventListener("load", function () {
+            if (window.emailjs) {
+                emailjs.init("Q3Th_ygTMmlLM1OxY"); // your public key
+            } else {
+                console.error("EmailJS failed to load.");
+            }
+        });
+    </script>
+
     <style>
         body {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background: #ddd6f5;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
         }
         #signup-box {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px gray;
-            width: 320px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 400px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        #signup-box h1 {
+            text-align: center;
+            color: #2d3748;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 30px;
         }
         input, select {
-            width: 95%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid gray;
-            border-radius: 6px;
-            background-color: white;
+            width: 100%;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         button {
             width: 100%;
-            padding: 10px;
-            background: #165b3c;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 12px;
             font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
         }
         button:hover {
-            background: #28845c;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #4a5568;
+        }
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        #otpSection {
+            margin-top: 10px;
+            display: none;
+        }
+        #signupMsg {
+            margin-top: 10px;
+            font-weight: 600;
         }
     </style>
-    </head>
-    <body>
+</head>
+<body>
     <div id="signup-box">
-        <h1 style="text-align:center; color: #64155c;">Sign up</h1>
+        <h1>Create Account</h1>
         <form id="signupForm">
-        <input type="text" id="name" placeholder="Enter Name" required>
-        <input type="email" id="email" placeholder="Enter Email" required>
-        <input type="password" id="password" placeholder="Enter Password" required>
-        <select id="role" required>
-            <option value="">Select Role</option>
-            <option value="student">Student</option>
-            <option value="tutor">Tutor</option>
-        </select>
-        <button type="submit">Signup</button>
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Create a password" required>
+            </div>
+            <div class="form-group">
+                <label for="role">Role</label>
+                <select id="role" required>
+                    <option value="">Select your role</option>
+                    <option value="student">Student</option>
+                    <option value="tutor">Tutor</option>
+                </select>
+            </div>
+            <button type="submit" id="signupBtn">Send OTP</button>
         </form>
-        <p style="text-align:center; margin-top:10px;">
-        Already have an account? <a href="login.html">Log in</a>
-        </p>
-    </div>
-    <script>
-    document.getElementById("signupForm").addEventListener("submit", function(e){
-        e.preventDefault();
-        let name = document.getElementById("name").value;
-        let email = document.getElementById("email").value;
-        let password = document.getElementById("password").value;
-        let role = document.getElementById("role").value;
 
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if(!emailPattern.test(email)){
-            alert("Please enter a valid email address.");
+        <!-- OTP verification section -->
+        <div id="otpSection">
+            <small>We sent an OTP to your email. Enter it below to verify and complete signup.</small>
+            <input type="text" id="signupOtp" placeholder="Enter OTP">
+            <button type="button" id="verifyOtpBtn">Verify & Create Account</button>
+        </div>
+
+        <div id="signupMsg"></div>
+
+        <div class="login-link">
+            Already have an account? <a href="login.html">Sign In</a>
+        </div>
+    </div>
+
+    <script>
+    const signupForm = document.getElementById("signupForm");
+    const signupBtn = document.getElementById("signupBtn");
+    const otpSection = document.getElementById("otpSection");
+    const signupOtp = document.getElementById("signupOtp");
+    const signupMsg = document.getElementById("signupMsg");
+    const verifyOtpBtn = document.getElementById("verifyOtpBtn");
+
+    let pendingSignup = null; // { name, email, password, role }
+
+    function showSignupMsg(text, color) {
+        signupMsg.textContent = text;
+        signupMsg.style.color = color || "#1f2933";
+    }
+
+    function generateOTP() {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    signupForm.addEventListener("submit", function(e){
+        e.preventDefault();
+
+        const name = document.getElementById("name").value.trim();
+        const emailRaw = document.getElementById("email").value.trim();
+        const email = emailRaw.toLowerCase();
+        const password = document.getElementById("password").value.trim();
+        const role = document.getElementById("role").value;
+
+        if (!name || !email || !password || !role) {
+            showSignupMsg("Please fill in all fields.", "crimson");
             return;
         }
-        let users = JSON.parse(localStorage.getItem("users")) || [];
-        if(users.find(u => u.email === email)){
-        alert("User already exists!");
-        return;
+
+        if (password.length < 4) {
+            showSignupMsg("Password must be at least 4 characters.", "crimson");
+            return;
         }
-        users.push({ name, email, password, role });
+
+        let users = JSON.parse(localStorage.getItem("users")) || [];
+        // Case-insensitive duplicate check
+        if (users.find(u => (u.email || "").toLowerCase() === email)) {
+            alert("User already exists!");
+            return;
+        }
+
+        if (!window.emailjs) {
+            console.error("EmailJS is not available.");
+            showSignupMsg("Failed to send OTP. EmailJS not loaded.", "crimson");
+            return;
+        }
+
+        const otp = generateOTP();
+        const expiry = Date.now() + 5 * 60 * 1000; // 5 minutes
+
+        pendingSignup = { name, email, password, role };
+        localStorage.setItem("signupOTP:" + email, JSON.stringify({ otp, expiry, user: pendingSignup }));
+
+        const sentTime = new Date().toLocaleTimeString();
+
+        signupBtn.disabled = true;
+        signupBtn.textContent = "Sending OTP...";
+
+        emailjs
+            .send(
+                "service_wqurq5j",      // your service ID
+                "template_6lywhyw",     // your template ID
+                {
+                    to_email: email,    // must match template var
+                    otp: otp,
+                    time: sentTime
+                }
+            )
+            .then(res => {
+                console.log("Signup EmailJS success:", res);
+                showSignupMsg("OTP sent to your email. Check your inbox/spam.", "green");
+                otpSection.style.display = "block";
+            })
+            .catch(err => {
+                console.error("Signup EmailJS error:", err);
+                alert("EmailJS Error: " + JSON.stringify(err));
+                showSignupMsg("Failed to send OTP. Please try again.", "crimson");
+            })
+            .finally(() => {
+                signupBtn.disabled = false;
+                signupBtn.textContent = "Send OTP";
+            });
+    });
+
+    verifyOtpBtn.addEventListener("click", function(){
+        const emailRaw = document.getElementById("email").value.trim();
+        const email = emailRaw.toLowerCase();
+
+        if (!email) {
+            showSignupMsg("Enter your email first, then request OTP.", "crimson");
+            return;
+        }
+
+        const rec = JSON.parse(localStorage.getItem("signupOTP:" + email) || "null");
+
+        if (!rec) {
+            showSignupMsg("No OTP request found. Please submit the form to get OTP.", "crimson");
+            return;
+        }
+
+        if (Date.now() > rec.expiry) {
+            showSignupMsg("OTP expired. Please request a new one.", "crimson");
+            return;
+        }
+
+        if (signupOtp.value.trim() !== rec.otp) {
+            showSignupMsg("Incorrect OTP.", "crimson");
+            return;
+        }
+
+        // OTP is correct, finalize signup
+        let users = JSON.parse(localStorage.getItem("users")) || [];
+
+        // Use the stored user data to avoid tampering between OTP/request
+        const userData = rec.user || pendingSignup;
+        if (!userData) {
+            showSignupMsg("Something went wrong. Please try signing up again.", "crimson");
+            return;
+        }
+
+        // Normalize email to lowercase when saving
+        users.push({
+            name: userData.name,
+            email: (userData.email || "").toLowerCase(),
+            password: userData.password,
+            role: userData.role
+        });
+
         localStorage.setItem("users", JSON.stringify(users));
-        alert("Signup successful! Please login.");
-        window.location.href = "login.html";
+        localStorage.removeItem("signupOTP:" + email);
+        pendingSignup = null;
+
+        showSignupMsg("Signup successful! Redirecting to login...", "green");
+
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 1200);
     });
     </script>
 </body>
