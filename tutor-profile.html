@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tutor Profile</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body { background: lavender; }
+    
+    #profile-container {
+      width: 70%;
+      margin: 50px auto;
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    
+    .profile-header {
+      text-align: center;
+      padding-bottom: 30px;
+      border-bottom: 3px solid #6366f1;
+      margin-bottom: 30px;
+    }
+    
+    .profile-header img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #6366f1;
+      margin-bottom: 15px;
+    }
+    
+    .profile-header h1 {
+      color: #1e293b;
+      margin: 10px 0;
+      font-size: 32px;
+    }
+    
+    .profile-header .verified {
+      color: #10b981;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    
+    .profile-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+    
+    .info-item {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 10px;
+      border-left: 4px solid #6366f1;
+    }
+    
+    .info-item label {
+      display: block;
+      font-weight: bold;
+      color: #6366f1;
+      margin-bottom: 8px;
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+    
+    .info-item .value {
+      color: #1e293b;
+      font-size: 18px;
+      font-weight: 500;
+    }
+    
+    .profile-actions {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    
+    .btn {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-chat {
+      background: #10b981;
+      color: white;
+    }
+    
+    .btn-chat:hover {
+      background: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-back {
+      background: #6b7280;
+      color: white;
+    }
+    
+    .btn-back:hover {
+      background: #4b5563;
+    }
+    
+    .about-section {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 30px;
+    }
+    
+    .about-section h3 {
+      color: #1e293b;
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+    
+    .about-section p {
+      color: #374151;
+      line-height: 1.8;
+      font-size: 16px;
+    }
+    
+    .subjects-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .subject-tag {
+      background: #6366f1;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .error-message {
+      text-align: center;
+      color: #ef4444;
+      font-size: 18px;
+      padding: 50px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2 style="letter-spacing:1.5px;">Smart Tuition Media</h2>
+    <nav class="navi">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="admins.html">Admins</a>
+      <a href="student.html">Search Tutors</a>
+      <a href="contact.html">Contact</a>
+      <a href="login.html" onclick="logout()">Log out</a>
+    </nav>
+  </header>
+
+  <div id="fake"></div>
+
+  <div id="profile-container">
+    <div id="profileContent"></div>
+  </div>
+
+  <script>
+    window.onload = function() {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      if (!currentUser) {
+        alert("Please login first.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      // Get tutor info from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const tutorEmail = urlParams.get('email');
+      const tutorName = urlParams.get('name');
+
+      if (!tutorEmail && !tutorName) {
+        displayError("Tutor information not found.");
+        return;
+      }
+
+      // Find tutor from localStorage
+      const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
+      let tutor = null;
+
+      if (tutorEmail) {
+        tutor = tutors.find(t => t.email === decodeURIComponent(tutorEmail));
+      } else if (tutorName) {
+        tutor = tutors.find(t => t.name === decodeURIComponent(tutorName));
+      }
+
+      if (!tutor) {
+        displayError("Tutor profile not found.");
+        return;
+      }
+
+      displayProfile(tutor);
+    };
+
+    function displayProfile(tutor) {
+      const profileContent = document.getElementById("profileContent");
+      
+      // Split subjects if multiple
+      const subjects = tutor.subject ? tutor.subject.split(',').map(s => s.trim()) : [];
+      const subjectTags = subjects.map(s => `<span class="subject-tag">${s}</span>`).join('');
+
+      profileContent.innerHTML = `
+        <div class="profile-header">
+          <img src="https://img.icons8.com/color/96/000000/student-male--v2.png" alt="Tutor Photo" />
+          <h1>${tutor.name}</h1>
+          <p class="verified">✓ Verified Tutor</p>
+        </div>
+
+        <div class="profile-info">
+          <div class="info-item">
+            <label>🎓 University</label>
+            <div class="value">${tutor.varsity || 'Not specified'}</div>
+          </div>
+
+          <div class="info-item">
+            <label>📍 Location</label>
+            <div class="value">${tutor.location || 'Not specified'}</div>
+          </div>
+
+          <div class="info-item">
+            <label>💰 Expected Salary</label>
+            <div class="value">৳${tutor.salary || 'Negotiable'}/month</div>
+          </div>
+
+          <div class="info-item">
+            <label>📧 Email</label>
+            <div class="value" style="font-size: 14px;">${tutor.email || 'Not available'}</div>
+          </div>
+        </div>
+
+        <div class="about-section">
+          <h3>📚 Teaching Subjects</h3>
+          <div class="subjects-list">
+            ${subjectTags || '<span class="subject-tag">General</span>'}
+          </div>
+        </div>
+
+        <div class="about-section">
+          <h3>👨‍🏫 About This Tutor</h3>
+          <p>
+            ${tutor.name} is an experienced tutor from ${tutor.varsity || 'a reputed university'}. 
+            They specialize in teaching ${subjects[0] || 'various subjects'} and are available in the ${tutor.location} area.
+            With a professional approach to education, they are committed to helping students achieve their academic goals.
+          </p>
+        </div>
+
+        <div class="profile-actions">
+          <button class="btn btn-chat" onclick="startChat('${encodeURIComponent(tutor.name)}', '${encodeURIComponent(tutor.email || '')}')">
+            💬 Chat Now
+          </button>
+          <button class="btn btn-back" onclick="goBack()">
+            ← Back to Search
+          </button>
+        </div>
+      `;
+    }
+
+    function displayError(message) {
+      const profileContent = document.getElementById("profileContent");
+      profileContent.innerHTML = `
+        <div class="error-message">
+          <h2>⚠️ ${message}</h2>
+          <button class="btn btn-back" onclick="goBack()" style="margin-top: 20px;">
+            ← Back to Search
+          </button>
+        </div>
+      `;
+    }
+
+    function startChat(encodedName, encodedEmail) {
+      const hasEmail = encodedEmail && decodeURIComponent(encodedEmail) !== "";
+      const url = `chat.html?toName=${encodedName}` + (hasEmail ? `&toEmail=${encodedEmail}` : "");
+      window.location.href = url;
+    }
+
+    function goBack() {
+      window.location.href = "student.html";
+    }
+
+    function logout() {
+      localStorage.removeItem("currentUser");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
