@@ -12,276 +12,245 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #1a202c;
-            background: #0f0f23;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            color: #2d3748;
+            background: #f0f4f8;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        /* Animated Gradient Background */
-        .bg-gradient {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #4facfe);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-            z-index: 0;
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Floating Particles */
-        .particles {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            animation: float-up 15s infinite ease-in;
-        }
-
-        @keyframes float-up {
-            0% {
-                transform: translateY(100vh) translateX(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) translateX(100px);
-                opacity: 0;
-            }
-        }
-
+        /* Header with Gradient */
         header {
-            background: rgba(15, 15, 35, 0.95);
-            padding: 1.2rem 5%;
-            box-shadow: 0 4px 30px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 5%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
-            backdrop-filter: blur(20px);
-            border-bottom: 2px solid rgba(102, 126, 234, 0.5);
         }
 
         header h2 {
             display: inline-block;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #ffd140 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-size: 1.8rem;
-            font-weight: 800;
-            letter-spacing: 2px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
         }
 
         .navi {
             float: right;
-            margin-top: 8px;
+            margin-top: 5px;
+            display: flex;
+            gap: 0.5rem;
         }
 
         .navi a {
             text-decoration: none;
-            color: #fff;
-            margin-left: 2rem;
-            font-weight: 600;
+            color: white;
+            padding: 0.5rem 1.2rem;
+            font-weight: 500;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
-            position: relative;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
         }
 
         .navi a:hover {
-            color: #f093fb;
+            background: rgba(255, 255, 255, 0.2);
             transform: translateY(-2px);
-            text-shadow: 0 0 20px rgba(240, 147, 251, 0.8);
         }
 
-        .navi a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 3px;
-            bottom: -5px;
-            left: 50%;
-            background: linear-gradient(90deg, #f093fb, #f5576c);
-            transition: all 0.3s ease;
-            border-radius: 2px;
-        }
-
-        .navi a:hover::after {
-            width: 100%;
-            left: 0;
-        }
-
+        /* Main Content */
         #main {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 120px 5% 50px;
-            position: relative;
-            z-index: 2;
+            padding-top: 70px;
         }
 
-        #about {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
-            border-radius: 30px;
-            padding: 3rem;
+        /* About Section - Light Purple */
+        #about-section {
+            background: linear-gradient(135deg, #e0e7ff 0%, #fae8ff 100%);
+            padding: 5rem 5% 4rem;
+        }
+
+        .about-container {
             max-width: 800px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(240, 147, 251, 0.4),
-                        0 0 100px rgba(102, 126, 234, 0.3),
-                        inset 0 0 50px rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            position: relative;
-            overflow: hidden;
-            animation: slideUp 0.8s ease;
-        }
-
-        #about::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        #about h1 {
+            margin: 0 auto;
             text-align: center;
-            color: #ffd140;
+        }
+
+        .about-container h1 {
             font-size: 2.5rem;
-            margin-bottom: 2rem;
-            text-shadow: 0 0 30px rgba(255, 209, 64, 0.8),
-                         0 4px 10px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-
-        #about p {
-            color: rgba(255, 255, 255, 0.95);
-            font-size: 1.15rem;
-            line-height: 1.8;
-            margin-bottom: 2rem;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            position: relative;
-            z-index: 1;
-        }
-
-        #about p b {
-            color: #ffd140;
             font-weight: 700;
-            text-shadow: 0 0 15px rgba(255, 209, 64, 0.6);
+            color: #1a202c;
+            margin-bottom: 2rem;
+            line-height: 1.2;
         }
 
-        #about ul {
-            list-style: none;
-            margin-left: 2rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        #about ul li {
-            color: rgba(255, 255, 255, 0.95);
+        .about-container p {
             font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .about-container p b {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .about-features {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            text-align: left;
+        }
+
+        .about-features ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .about-features ul li {
+            font-size: 1.1rem;
+            color: #2d3748;
             margin-bottom: 1rem;
             padding-left: 2rem;
             position: relative;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
-        #about ul li::before {
-            content: '✦';
+        .about-features ul li::before {
+            content: '✓';
             position: absolute;
             left: 0;
-            color: #4facfe;
-            font-size: 1.3rem;
-            text-shadow: 0 0 15px rgba(79, 172, 254, 0.8);
+            color: #667eea;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Section Title */
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin: 0;
+            padding: 3rem 5% 2rem;
+        }
+
+        /* Features Section - Light Green */
+        #features-wrapper {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            padding: 3rem 0;
+        }
+
+        #part3-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 0 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-box {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-box h3 {
+            font-size: 1.1rem;
+            color: #1a202c;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .feature-box p {
+            font-size: 0.9rem;
+            color: #718096;
+            line-height: 1.5;
+        }
+
+        /* Footer - Dark Purple */
+        #part4 {
+            background: linear-gradient(135deg, #4c1d95 0%, #5b21b6 100%);
+            padding: 3rem 5%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            color: white;
+        }
+
+        .no h3 {
+            color: #e9d5ff;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .no p {
+            color: #ddd6fe;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
         }
 
         @media (max-width: 768px) {
             header h2 {
-                font-size: 1.4rem;
+                font-size: 1.2rem;
                 display: block;
                 text-align: center;
+                margin-bottom: 0.5rem;
             }
 
             .navi {
                 float: none;
-                text-align: center;
-                margin-top: 1rem;
+                justify-content: center;
+                flex-wrap: wrap;
             }
 
             .navi a {
-                margin: 0 0.8rem;
-                font-size: 0.9rem;
+                font-size: 0.85rem;
+                padding: 0.4rem 1rem;
             }
 
-            #about {
-                padding: 2rem;
-            }
-
-            #about h1 {
+            .about-container h1 {
                 font-size: 2rem;
             }
 
-            #about p {
+            .about-container p {
                 font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+                padding: 2rem 5% 1.5rem;
+            }
+
+            #part3-features {
+                grid-template-columns: 1fr;
+                padding: 0 5%;
+            }
+
+            #features-wrapper {
+                padding: 2rem 0;
             }
         }
     </style>
 </head>
 <body>
-    <div class="bg-gradient"></div>
-    <div class="particles">
-        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
-        <div class="particle" style="left: 20%; animation-delay: 2s;"></div>
-        <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
-        <div class="particle" style="left: 40%; animation-delay: 1s;"></div>
-        <div class="particle" style="left: 50%; animation-delay: 3s;"></div>
-        <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
-        <div class="particle" style="left: 70%; animation-delay: 2.5s;"></div>
-        <div class="particle" style="left: 80%; animation-delay: 4.5s;"></div>
-        <div class="particle" style="left: 90%; animation-delay: 1.5s;"></div>
-    </div>
-
     <header>
         <h2>Smart Tuition Media</h2>
         <nav class="navi">
@@ -289,21 +258,78 @@
             <a href="about.html">About</a>
             <a href="admins.html">Admins</a>
             <a href="contact.html">Contact</a>
+            <a href="login.html">Login</a>
         </nav>
     </header>
 
     <div id="main">
-        <div id="about">
-            <h1>About Us</h1>
-            <p>
-                <b>Smart Tuition Media</b> is one of the leading tutor-matching platforms in the country.<br><br>
-                Our goal is to create an easy and "smart" connection between skilled teachers and enthusiastic students.
-            </p>
-            <ul>
-                <li>Many years of experience</li>
-                <li>Trusted and experienced team</li>
-                <li>Simple, modern usability</li>
-            </ul>
+        <!-- About Section - Light Purple -->
+        <div id="about-section">
+            <div class="about-container">
+                <h1>About Us</h1>
+                <p>
+                    <b>Smart Tuition Media</b> is one of the leading tutor-matching platforms in the country.<br><br>
+                    Our goal is to create an easy and "smart" connection between skilled teachers and enthusiastic students.
+                </p>
+                <div class="about-features">
+                    <ul>
+                        <li>Many years of experience</li>
+                        <li>Trusted and experienced team</li>
+                        <li>Simple, modern usability</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Why Section - Light Green Background -->
+        <div id="features-wrapper">
+            <p class="section-title">Why Smart Tuition Media?</p>
+            
+            <div id="part3-features">
+                <div class="feature-box">
+                    <div class="feature-icon">✓</div>
+                    <h3>Verified Teachers</h3>
+                    <p>All teachers are verified to ensure quality education for your children.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">📚</div>
+                    <h3>All Subjects & Classes</h3>
+                    <p>From Class 1 to University level, find teachers for any subject.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">💻</div>
+                    <h3>Online & In-Person</h3>
+                    <p>Choose between online tutoring or in-person home tuition.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">💰</div>
+                    <h3>Transparent Pricing</h3>
+                    <p>See hourly rates upfront with no hidden fees.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">📞</div>
+                    <h3>Easy Contact</h3>
+                    <p>Connect directly with teachers via WhatsApp or phone.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Nationwide Coverage</h3>
+                    <p>Find teachers in your city or learn online from anywhere.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer - Dark Purple -->
+        <div id="part4">
+            <div class="no">
+                <h3>Smart Tuition Media</h3>
+                <p>Country's #1 tutor matching platform</p>
+            </div>
+            <div class="no">
+                <h3>Contact</h3>
+                <p>Email: info@smarttuition.com</p>
+                <p>Phone: +880 1234 567890</p>
+            </div>
         </div>
     </div>
 </body>
