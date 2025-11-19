@@ -159,7 +159,7 @@
 
         /* Stats Section */
         #stats-wrapper {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #cce9e9 100%);
             padding: 3rem 0;
         }
 
@@ -173,7 +173,7 @@
         }
 
         .box {
-            background: white;
+            background: rgb(199, 208, 239);
             border-radius: 12px;
             padding: 2.5rem 2rem;
             text-align: center;
@@ -342,6 +342,7 @@
                 <span id="chatBadge" class="chat-badge" style="display: none;"></span>
             </a>
             <a href="contact.html">Contact</a>
+            <a href="review.html">Rate Us</a>
             <a href="login.html" id="loginBtn">Login</a>
             <a href="#" id="logoutBtn" style="display:none;" onclick="logout()">Logout</a>
         </nav>
@@ -374,7 +375,7 @@
                 </div>
                 <div class="box">
                     <img src="https://img.icons8.com/color/96/000000/pencil--v2.png" alt="Rating icon">
-                    <p>4.9/5</p>
+                    <p id="avgRating">4.9/5</p>
                     <p>Avg. Tutor Rating</p>
                 </div>
             </div>
@@ -511,6 +512,14 @@
 
             let tutors = JSON.parse(localStorage.getItem("tutors")) || [];
             document.getElementById("totalTutors").innerText = tutors.length;
+
+            // Display average rating from reviews
+            let reviews = JSON.parse(localStorage.getItem('reviews')) || [];
+            if (reviews.length > 0) {
+                const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+                const average = (totalRating / reviews.length).toFixed(1);
+                document.getElementById('avgRating').innerText = average + '/5';
+            }
         }
 
         function logout(){
