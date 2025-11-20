@@ -346,30 +346,55 @@
         </div>
     </div>
 
+    <!-- Supabase CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+
     <script>
         // ---------------- Login handler ----------------
-        document.getElementById("loginForm").addEventListener("submit", function(e){
+        document.getElementById("loginForm").addEventListener("submit", async function(e){
             e.preventDefault();
 
             const email = document.getElementById("email").value.trim().toLowerCase();
             const password = document.getElementById("password").value.trim();
             const role = document.getElementById("role").value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
 
-            let users = JSON.parse(localStorage.getItem("users")) || [];
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Logging in...';
 
-            // login email is case-insensitive
-            const user = users.find(u => 
-                (u.email || "").toLowerCase() === email && 
-                u.password === password && 
-                u.role === role
-            );
+            try {
+                console.log('Attempting to find user with email:', email);
+                const { data: user, error } = await db.getUserByEmail(email);
+                
+                console.log('Database response:', { user, error });
 
-            if(user){
+                if (error) {
+                    console.error('Database error:', error);
+                    alert("Database error: " + error.message);
+                    return;
+                }
+                
+                if (!user) {
+                    alert("User not found! Make sure you signed up first.");
+                    return;
+                }
+
+                if (user.password !== password || user.role !== role) {
+                    alert("Invalid credentials!");
+                    return;
+                }
+
                 alert("Login successful!");
                 localStorage.setItem("currentUser", JSON.stringify(user));
                 window.location.href = "index.html";
-            } else {
-                alert("Invalid credentials!");
+            } catch (error) {
+                console.error('Login error:', error);
+                alert("Login failed. Please try again.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Login';
             }
         });
 
@@ -427,29 +452,34 @@
             return Math.floor(100000 + Math.random()*900000).toString(); 
         }
 
-        fpSendOtp.addEventListener('click', function(){
+        fpSendOtp.addEventListener('click', async function(){
             const email = fpEmail.value.trim().toLowerCase();
             if(!email){ 
                 showMsg('Enter your email.', 'crimson'); 
                 return; 
             }
 
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            if(!users.find(u => (u.email || '').toLowerCase() === email)){
-                showMsg('Email not found.', 'crimson');
-                return;
+            try {
+                const { data: user, error } = await db.getUserByEmail(email);
+                if (error || !user) {
+                    showMsg('Email not found.', 'crimson');
+                    return;
+                }
+
+                const otp = generateOTP();
+                const expiry = Date.now() + 5 * 60 * 1000; // 5 minutes
+                localStorage.setItem('resetOTP:'+email, JSON.stringify({ otp, expiry }));
+
+                // For demo purposes - in real implementation, use EmailJS
+                showMsg(`OTP sent to your email: ${otp} (Demo)`, 'green');
+                fpStep2.style.display='block';
+            } catch (error) {
+                console.error('Email check error:', error);
+                showMsg('Failed to verify email.', 'crimson');
             }
-
-            const otp = generateOTP();
-            const expiry = Date.now() + 5 * 60 * 1000; // 5 minutes
-            localStorage.setItem('resetOTP:'+email, JSON.stringify({ otp, expiry }));
-
-            // For demo purposes - in real implementation, use EmailJS
-            showMsg(`OTP sent to your email: ${otp} (Demo)`, 'green');
-            fpStep2.style.display='block';
         });
 
-        fpVerify.addEventListener('click', function(){
+        fpVerify.addEventListener('click', async function(){
             const email = fpEmail.value.trim().toLowerCase();
             const rec = JSON.parse(localStorage.getItem('resetOTP:'+email) || 'null');
 
@@ -472,15 +502,20 @@
                 return;
             }
 
-            let users = JSON.parse(localStorage.getItem('users')) || [];
-            users = users.map(u => 
-                (u.email || '').toLowerCase() === email ? ({...u, password:newPass}) : u
-            );
-            localStorage.setItem('users', JSON.stringify(users));
-            localStorage.removeItem('resetOTP:'+email);
+            try {
+                const { error } = await db.updateUserPassword(email, newPass);
+                if (error) {
+                    showMsg('Failed to update password.', 'crimson');
+                    return;
+                }
 
-            showMsg('Password reset successful!', 'green');
-            setTimeout(closeFP, 1200);
+                localStorage.removeItem('resetOTP:'+email);
+                showMsg('Password reset successful!', 'green');
+                setTimeout(closeFP, 1200);
+            } catch (error) {
+                console.error('Password reset error:', error);
+                showMsg('Failed to reset password.', 'crimson');
+            }
         });
     </script>
 </body>

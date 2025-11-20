@@ -173,8 +173,12 @@
     <div id="profileContent"></div>
   </div>
 
+  <!-- Supabase CDN -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  
   <script>
-    window.onload = function() {
+    window.onload = async function() {
       const currentUser = JSON.parse(localStorage.getItem("currentUser"));
       if (!currentUser) {
         alert("Please login first.");
@@ -182,7 +186,6 @@
         return;
       }
 
-      // Get tutor info from URL parameters
       const urlParams = new URLSearchParams(window.location.search);
       const tutorEmail = urlParams.get('email');
       const tutorName = urlParams.get('name');
@@ -192,22 +195,30 @@
         return;
       }
 
-      // Find tutor from localStorage
-      const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
-      let tutor = null;
+      try {
+        const { data: tutors, error } = await db.getTutors();
+        if (error || !tutors) {
+          displayError("Failed to load tutor data.");
+          return;
+        }
 
-      if (tutorEmail) {
-        tutor = tutors.find(t => t.email === decodeURIComponent(tutorEmail));
-      } else if (tutorName) {
-        tutor = tutors.find(t => t.name === decodeURIComponent(tutorName));
+        let tutor = null;
+        if (tutorEmail) {
+          tutor = tutors.find(t => t.email === decodeURIComponent(tutorEmail));
+        } else if (tutorName) {
+          tutor = tutors.find(t => t.name === decodeURIComponent(tutorName));
+        }
+
+        if (!tutor) {
+          displayError("Tutor profile not found.");
+          return;
+        }
+
+        displayProfile(tutor);
+      } catch (error) {
+        console.error('Error loading tutor profile:', error);
+        displayError("Failed to load tutor profile.");
       }
-
-      if (!tutor) {
-        displayError("Tutor profile not found.");
-        return;
-      }
-
-      displayProfile(tutor);
     };
 
     function displayProfile(tutor) {
