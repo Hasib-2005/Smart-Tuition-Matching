@@ -121,6 +121,10 @@
     <div id="results"></div>
   </div>
 
+  <!-- Supabase CDN -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  
   <script>
     window.onload = function () {
       const user = JSON.parse(localStorage.getItem("currentUser"));
@@ -130,19 +134,43 @@
         return;
       }
 
-      // Role check: hide inappropriate nav link
+      // Role check: show appropriate navigation
       if (user.role === "student") {
+        // Students can search for tutors
         const tutorLink = document.querySelector('a[href="tutor.html"]');
         if (tutorLink) tutorLink.style.display = "none";
-      }
-      if (user.role === "tutor") {
+      } else if (user.role === "tutor") {
+        // Tutors can manage their profile
         const studentLink = document.querySelector('a[href="student.html"]');
         if (studentLink) studentLink.style.display = "none";
       }
+      
+      console.log('User logged in:', user.name, 'Role:', user.role);
 
-      // Default: show all tutors
-      renderTutors(JSON.parse(localStorage.getItem("tutors")) || []);
+      // Load and show all tutors from Supabase
+      loadTutors();
     };
+
+    async function loadTutors(filters = {}) {
+      const results = document.getElementById("results");
+      utils.showLoading(results, 'Searching tutors...');
+      
+      try {
+        const { data: tutors, error } = await db.getTutors(filters);
+        
+        if (error) {
+          console.error('Database error:', error);
+          utils.showError(results, 'Failed to load tutors: ' + error.message);
+          return;
+        }
+        
+        console.log('Found tutors:', tutors?.length || 0);
+        renderTutors(tutors || []);
+      } catch (error) {
+        console.error('Error loading tutors:', error);
+        utils.showError(results, 'Network error. Please try again.');
+      }
+    }
 
     function renderTutors(tutors){
       const results = document.getElementById("results");
@@ -160,7 +188,7 @@
             <p><b>Varsity:</b> ${t.varsity}</p>
             <p><b>Subject:</b> ${t.subject}</p>
             <p><b>Location:</b> ${t.location}</p>
-            <p><b>Salary:</b> ${t.salary}</p>
+            <p><b>Salary:</b> ৳${t.salary}</p>
             <button onclick="viewProfile('${encodeURIComponent(t.name)}','${encodeURIComponent(safeEmail)}')">View Profile</button>
             <button onclick="handleChat('${encodeURIComponent(t.name)}','${encodeURIComponent(safeEmail)}')">Chat</button>
           </div>
@@ -176,28 +204,29 @@
       const location = document.getElementById("location").value;
       const salary = document.getElementById("salary").value;
 
-      const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
-      const filtered = tutors.filter(t => {
-        if (subject){
-          const tutorSubjects = (t.subject || "").toLowerCase().split(",").map(s=>s.trim());
-          if (!tutorSubjects.includes(subject.toLowerCase())) return false;
-        }
-        if (location && t.location !== location) return false;
-        if (salary){
-          const sal = parseInt(t.salary);
-          if (salary === "2000-4000" && (sal < 2000 || sal > 4000)) return false;
-          if (salary === "4000-6000" && (sal < 4000 || sal > 6000)) return false;
-          if (salary === "6000+" && sal < 6000) return false;
-        }
-        return true;
-      });
-
-      const resultsDiv = document.getElementById("results");
-      if (!filtered.length){
-        resultsDiv.innerHTML = "<p>No tutor found.</p>";
-      } else {
-        renderTutors(filtered);
+      const filters = {};
+      
+      if (subject && subject.trim()) {
+        filters.subject = subject.trim();
       }
+      if (location && location.trim()) {
+        filters.location = location.trim();
+      }
+      if (salary && salary.trim()) {
+        if (salary === "2000-4000") {
+          filters.minSalary = 2000;
+          filters.maxSalary = 4000;
+        } else if (salary === "4000-6000") {
+          filters.minSalary = 4000;
+          filters.maxSalary = 6000;
+        } else if (salary === "6000+") {
+          filters.minSalary = 6000;
+        }
+      }
+      
+      console.log('Search filters:', filters);
+
+      loadTutors(filters);
     });
 
     // View tutor profile

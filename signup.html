@@ -151,6 +151,10 @@
         </div>
     </div>
 
+    <!-- Supabase CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+
     <script>
     const signupForm = document.getElementById("signupForm");
     const signupBtn = document.getElementById("signupBtn");
@@ -170,7 +174,7 @@
         return Math.floor(100000 + Math.random() * 900000).toString();
     }
 
-    signupForm.addEventListener("submit", function(e){
+    signupForm.addEventListener("submit", async function(e){
         e.preventDefault();
 
         const name = document.getElementById("name").value.trim();
@@ -189,11 +193,15 @@
             return;
         }
 
-        let users = JSON.parse(localStorage.getItem("users")) || [];
-        // Case-insensitive duplicate check
-        if (users.find(u => (u.email || "").toLowerCase() === email)) {
-            alert("User already exists!");
-            return;
+        // Check if user already exists
+        try {
+            const { data: existingUser } = await db.getUserByEmail(email);
+            if (existingUser) {
+                alert("User already exists!");
+                return;
+            }
+        } catch (error) {
+            // User doesn't exist, continue with signup
         }
 
         if (!window.emailjs) {
@@ -239,7 +247,7 @@
             });
     });
 
-    verifyOtpBtn.addEventListener("click", function(){
+    verifyOtpBtn.addEventListener("click", async function(){
         const emailRaw = document.getElementById("email").value.trim();
         const email = emailRaw.toLowerCase();
 
@@ -266,32 +274,43 @@
         }
 
         // OTP is correct, finalize signup
-        let users = JSON.parse(localStorage.getItem("users")) || [];
-
-        // Use the stored user data to avoid tampering between OTP/request
         const userData = rec.user || pendingSignup;
         if (!userData) {
             showSignupMsg("Something went wrong. Please try signing up again.", "crimson");
             return;
         }
 
-        // Normalize email to lowercase when saving
-        users.push({
-            name: userData.name,
-            email: (userData.email || "").toLowerCase(),
-            password: userData.password,
-            role: userData.role
-        });
+        verifyOtpBtn.disabled = true;
+        verifyOtpBtn.textContent = 'Creating account...';
 
-        localStorage.setItem("users", JSON.stringify(users));
-        localStorage.removeItem("signupOTP:" + email);
-        pendingSignup = null;
+        try {
+            const { data, error } = await db.createUser({
+                name: userData.name,
+                email: userData.email.toLowerCase(),
+                password: userData.password,
+                role: userData.role
+            });
 
-        showSignupMsg("Signup successful! Redirecting to login...", "green");
+            if (error) {
+                showSignupMsg("Failed to create account. Please try again.", "crimson");
+                return;
+            }
 
-        setTimeout(() => {
-            window.location.href = "login.html";
-        }, 1200);
+            localStorage.removeItem("signupOTP:" + email);
+            pendingSignup = null;
+
+            showSignupMsg("Signup successful! Redirecting to login...", "green");
+
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 1200);
+        } catch (error) {
+            console.error('Signup error:', error);
+            showSignupMsg("Failed to create account. Please try again.", "crimson");
+        } finally {
+            verifyOtpBtn.disabled = false;
+            verifyOtpBtn.textContent = 'Verify & Create Account';
+        }
     });
     </script>
 </body>

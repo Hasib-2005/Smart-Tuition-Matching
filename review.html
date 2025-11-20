@@ -347,6 +347,10 @@
         </div>
     </div>
 
+    <!-- Supabase CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    
     <script>
         let selectedRating = 0;
 
@@ -382,8 +386,15 @@
         }
 
         // Form Submission
-        document.getElementById('reviewForm').addEventListener('submit', function(e) {
+        document.getElementById('reviewForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                alert('Please login first to submit a review!');
+                window.location.href = 'login.html';
+                return;
+            }
 
             if (selectedRating === 0) {
                 alert('Please select a star rating!');
@@ -398,70 +409,86 @@
                 return;
             }
 
-            // Create review object
-            const review = {
-                id: Date.now(),
-                name: reviewerName,
-                rating: selectedRating,
-                text: reviewText,
-                date: new Date().toISOString()
-            };
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
 
-            // Save to localStorage
-            let reviews = JSON.parse(localStorage.getItem('reviews')) || [];
-            reviews.unshift(review); // Add to beginning of array
-            localStorage.setItem('reviews', JSON.stringify(reviews));
+            try {
+                const { error } = await db.createReview({
+                    reviewer_name: reviewerName,
+                    reviewer_email: currentUser.email,
+                    rating: selectedRating,
+                    comment: reviewText
+                });
 
-            // Show success message
-            const successMessage = document.getElementById('successMessage');
-            successMessage.style.display = 'block';
-            setTimeout(() => {
-                successMessage.style.display = 'none';
-            }, 3000);
+                if (error) {
+                    alert('Failed to submit review. Please try again.');
+                    return;
+                }
 
-            // Reset form
-            document.getElementById('reviewForm').reset();
-            selectedRating = 0;
-            updateStars(0);
+                // Show success message
+                const successMessage = document.getElementById('successMessage');
+                successMessage.style.display = 'block';
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 3000);
 
-            // Refresh reviews list
-            displayReviews();
+                // Reset form
+                document.getElementById('reviewForm').reset();
+                selectedRating = 0;
+                updateStars(0);
+
+                // Refresh reviews list
+                await displayReviews();
+            } catch (error) {
+                console.error('Error submitting review:', error);
+                alert('Failed to submit review. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Review';
+            }
         });
 
         // Display Reviews
-        function displayReviews() {
+        async function displayReviews() {
             const reviewsList = document.getElementById('reviewsList');
-            let reviews = JSON.parse(localStorage.getItem('reviews')) || [];
+            
+            try {
+                const { data: reviews, error } = await db.getReviews();
+                
+                if (error || !reviews || reviews.length === 0) {
+                    reviewsList.innerHTML = '<p class="no-reviews">No reviews yet. Be the first to review!</p>';
+                    return;
+                }
 
-            if (reviews.length === 0) {
-                reviewsList.innerHTML = '<p class="no-reviews">No reviews yet. Be the first to review!</p>';
-                return;
-            }
+                let html = '';
+                reviews.forEach(review => {
+                    const date = new Date(review.created_at);
+                    const formattedDate = date.toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
 
-            let html = '';
-            reviews.forEach(review => {
-                const date = new Date(review.date);
-                const formattedDate = date.toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric' 
+                    const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+
+                    html += `
+                        <div class="review-item">
+                            <div class="review-item-header">
+                                <span class="review-item-name">${review.reviewer_name}</span>
+                                <span class="review-item-stars">${stars}</span>
+                            </div>
+                            <div class="review-item-date">${formattedDate}</div>
+                            <div class="review-item-text">${review.comment || 'No comment provided'}</div>
+                        </div>
+                    `;
                 });
 
-                const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
-
-                html += `
-                    <div class="review-item">
-                        <div class="review-item-header">
-                            <span class="review-item-name">${review.name}</span>
-                            <span class="review-item-stars">${stars}</span>
-                        </div>
-                        <div class="review-item-date">${formattedDate}</div>
-                        <div class="review-item-text">${review.text}</div>
-                    </div>
-                `;
-            });
-
-            reviewsList.innerHTML = html;
+                reviewsList.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                reviewsList.innerHTML = '<p class="no-reviews">Failed to load reviews.</p>';
+            }
         }
 
         // Login/Logout functionality
@@ -470,19 +497,20 @@
             window.location.href = "login.html";
         }
 
-        window.onload = function() {
+        window.onload = async function() {
             let user = JSON.parse(localStorage.getItem("currentUser"));
 
             if (user) {
                 document.getElementById("loginBtn").style.display = "none";
                 document.getElementById("logoutBtn").style.display = "inline-block";
+                document.getElementById('reviewerName').value = user.name;
             } else {
                 document.getElementById("loginBtn").style.display = "inline-block";
                 document.getElementById("logoutBtn").style.display = "none";
             }
 
             // Display existing reviews
-            displayReviews();
+            await displayReviews();
         }
     </script>
 </body>

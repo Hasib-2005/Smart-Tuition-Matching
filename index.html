@@ -243,6 +243,23 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             width: 200px;
         }
+        
+        .picbox button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .picbox button:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
 
         .picbox:hover {
             transform: translateY(-5px);
@@ -370,12 +387,12 @@
                 </div>
                 <div class="box">
                     <img src="https://img.icons8.com/color/96/000000/book.png" alt="Book icon">
-                    <p>120+</p>
-                    <p>Successful Matches</p>
+                    <p id="totalUsers">0</p>
+                    <p>Total Users</p>
                 </div>
                 <div class="box">
                     <img src="https://img.icons8.com/color/96/000000/pencil--v2.png" alt="Rating icon">
-                    <p id="avgRating">4.9/5</p>
+                    <p id="avgRating">0/5</p>
                     <p>Avg. Tutor Rating</p>
                 </div>
             </div>
@@ -390,26 +407,31 @@
                     <img src="hasib copy.jpg" alt="Mohammad Hasibur Rahman">
                     <h4>Mohammad Hasibur Rahman</h4>
                     <p>B.Sc(CSE, SUST)</p>
+                    <button onclick="contactAdmin('hasib4362005@gmail.com')">📧 Contact</button>
                 </div>
                 <div class="picbox">
                     <img src="tithi.avif" alt="Tithi Rani Das">
                     <h4>Tithi Rani Das</h4>
                     <p>B.Sc(CSE, SUST)</p>
+                    <button onclick="contactAdmin('tithiranidas106@gmail.com')">📧 Contact</button>
                 </div>
                 <div class="picbox">
                     <img src="siam.jpg" alt="Toufiqul Hossain Siam">
                     <h4>Toufiqul Hossain Siam</h4>
                     <p>B.Sc(CSE, SUST)</p>
+                    <button onclick="contactAdmin('thsiam360@gmail.com')">📧 Contact</button>
                 </div>
                 <div class="picbox">
                     <img src="ishmam.jpg" alt="Syed Ishmamul Hauqe">
                     <h4>Syed Ishmamul Hauqe</h4>
                     <p>B.Sc(CSE, SUST)</p>
+                    <button onclick="contactAdmin('ishmamulhaque@gmail.com')">📧 Contact</button>
                 </div>
                 <div class="picbox">
                     <img src="sami.jpg" alt="Arman Nesar Samy">
                     <h4>Arman Nesar Samy</h4>
                     <p>B.Sc(CSE, SUST)</p>
+                    <button onclick="contactAdmin('ghostfreak4444@gmail.com')">📧 Contact</button>
                 </div>
             </div>
         </div>
@@ -428,6 +450,10 @@
         </div>
     </div>
 
+    <!-- Supabase CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    
     <script>
         function goToPage(role){
             let user = JSON.parse(localStorage.getItem("currentUser"));
@@ -453,7 +479,7 @@
             }
         }
 
-        function updateChatBadge() {
+        async function updateChatBadge() {
             const chatBadge = document.getElementById('chatBadge');
             const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
             
@@ -463,14 +489,13 @@
             }
 
             try {
-                const allMessages = JSON.parse(localStorage.getItem('messages') || '[]');
+                const { data: allMessages } = await db.getMessages(currentUser.email) || { data: [] };
                 const lastSeen = parseInt(localStorage.getItem('chat:lastSeen:' + currentUser.email) || '0');
                 
-                // Count unread messages
-                const unreadCount = allMessages.filter(m => 
-                    m.to === currentUser.email && 
-                    new Date(m.at).getTime() > lastSeen
-                ).length;
+                const unreadCount = allMessages ? allMessages.filter(m => 
+                    m.to_email === currentUser.email && 
+                    new Date(m.created_at).getTime() > lastSeen
+                ).length : 0;
 
                 if (unreadCount > 0) {
                     chatBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
@@ -490,14 +515,10 @@
             setInterval(updateChatBadge, 5000);
         }
 
-        // Listen for storage changes (when new messages arrive)
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'messages') {
-                updateChatBadge();
-            }
-        });
+        // Poll for new messages every 30 seconds
+        setInterval(updateChatBadge, 30000);
 
-        window.onload = function(){
+        window.onload = async function(){
             let user = JSON.parse(localStorage.getItem("currentUser"));
 
             if(user){
@@ -510,21 +531,37 @@
                 document.getElementById("logoutBtn").style.display = "none";
             }
 
-            let tutors = JSON.parse(localStorage.getItem("tutors")) || [];
-            document.getElementById("totalTutors").innerText = tutors.length;
-
-            // Display average rating from reviews
-            let reviews = JSON.parse(localStorage.getItem('reviews')) || [];
-            if (reviews.length > 0) {
-                const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
-                const average = (totalRating / reviews.length).toFixed(1);
-                document.getElementById('avgRating').innerText = average + '/5';
+            // Load stats from Supabase
+            try {
+                const [tutorsResult, usersResult, ratingsResult] = await Promise.all([
+                    db.getTutors(),
+                    supabase.from('users').select('*'),
+                    db.getAverageRating()
+                ]);
+                
+                if (!tutorsResult.error && tutorsResult.data) {
+                    document.getElementById("totalTutors").innerText = tutorsResult.data.length;
+                }
+                
+                if (!usersResult.error && usersResult.data) {
+                    document.getElementById("totalUsers").innerText = usersResult.data.length;
+                }
+                
+                if (!ratingsResult.error && ratingsResult.data !== null) {
+                    document.getElementById('avgRating').innerText = ratingsResult.data + '/5';
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
             }
         }
 
         function logout(){
             localStorage.removeItem("currentUser");
             window.location.href = "login.html";
+        }
+        
+        function contactAdmin(email) {
+            window.location.href = `mailto:${email}?subject=Smart Tuition Media - Contact&body=Hello,%0D%0A%0D%0AI would like to get in touch regarding Smart Tuition Media.%0D%0A%0D%0AThank you.`;
         }
     </script>
 </body>

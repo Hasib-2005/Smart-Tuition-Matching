@@ -235,7 +235,11 @@
         <div id="chatList"></div>
     </div>
 
-    <script>
+    <!-- Supabase CDN -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+
+<script>
     let currentUser;
     let messageCheckInterval;
 
@@ -247,45 +251,32 @@
             return;
         }
 
-        // Pre-fill form if tutor already posted
         prefillForm();
-        
-        // Show existing posts
         showTutorPosts();
-        
-        // Load messages
         loadMessages();
-
-        messageCheckInterval = setInterval(loadMessages, 2000);
-
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'messages') {
-                loadMessages();
-            }
-        });
-
-        window.addEventListener('beforeunload', function() {
-            markMessagesRead();
-            if (messageCheckInterval) clearInterval(messageCheckInterval);
-        });
+        messageCheckInterval = setInterval(loadMessages, 5000);
     };
 
-    // Pre-fill form with existing tutor data
-    function prefillForm() {
-        const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
-        const myProfile = tutors.find(t => t.email === currentUser.email);
-        
-        if (myProfile) {
-            document.getElementById("name").value = myProfile.name || "";
-            document.getElementById("varsity").value = myProfile.varsity || "";
-            document.getElementById("subject").value = myProfile.subject || "";
-            document.getElementById("location").value = myProfile.location || "";
-            document.getElementById("salary").value = myProfile.salary || "";
+    async function prefillForm() {
+        try {
+            const { data: tutors, error } = await db.getTutors();
+            if (!error && tutors) {
+                const myProfile = tutors.find(t => t.email === currentUser.email);
+                
+                if (myProfile) {
+                    document.getElementById("name").value = myProfile.name || "";
+                    document.getElementById("varsity").value = myProfile.varsity || "";
+                    document.getElementById("subject").value = myProfile.subject || "";
+                    document.getElementById("location").value = myProfile.location || "";
+                    document.getElementById("salary").value = myProfile.salary || "";
+                }
+            }
+        } catch (error) {
+            console.error('Error loading tutor profile:', error);
         }
     }
 
-    // ✅ Handle form submission - Save tutor profile
-    document.getElementById("tutorForm").addEventListener("submit", function(e) {
+    document.getElementById("tutorForm").addEventListener("submit", async function(e) {
         e.preventDefault();
         
         const name = document.getElementById("name").value.trim();
@@ -293,16 +284,15 @@
         const subject = document.getElementById("subject").value;
         const location = document.getElementById("location").value;
         const salary = document.getElementById("salary").value;
+        const submitBtn = e.target.querySelector('button[type="submit"]');
 
         if (!name || !varsity || !subject || !location || !salary) {
             document.getElementById("msg").innerHTML = '<span style="color:red;">❌ All fields are required!</span>';
             return;
         }
 
-        const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
-        
-        // Check if tutor already exists
-        const existingIndex = tutors.findIndex(t => t.email === currentUser.email);
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
         
         const tutorData = {
             name: name,
@@ -310,156 +300,160 @@
             varsity: varsity,
             subject: subject,
             location: location,
-            salary: salary,
-            postedAt: new Date().toISOString()
+            salary: parseInt(salary)
         };
 
-        if (existingIndex !== -1) {
-            // Update existing profile
-            tutors[existingIndex] = tutorData;
-            document.getElementById("msg").innerHTML = '<span style="color:green;">✅ Profile updated successfully!</span>';
-        } else {
-            // Add new profile
-            tutors.push(tutorData);
-            document.getElementById("msg").innerHTML = '<span style="color:green;">✅ Profile posted successfully!</span>';
-        }
+        try {
+            const { data, error } = await db.createOrUpdateTutor(tutorData);
+            
+            if (error) {
+                document.getElementById("msg").innerHTML = '<span style="color:red;">❌ Failed to save profile!</span>';
+                return;
+            }
 
-        // Save to localStorage
-        localStorage.setItem("tutors", JSON.stringify(tutors));
-        
-        setTimeout(() => {
-            document.getElementById("msg").innerHTML = '';
-            showTutorPosts();
-        }, 2000);
+            document.getElementById("msg").innerHTML = '<span style="color:green;">✅ Profile saved successfully!</span>';
+            
+            setTimeout(() => {
+                document.getElementById("msg").innerHTML = '';
+                showTutorPosts();
+            }, 2000);
+        } catch (error) {
+            console.error('Error saving tutor profile:', error);
+            document.getElementById("msg").innerHTML = '<span style="color:red;">❌ Failed to save profile!</span>';
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Post Profile';
+        }
     });
 
-    // ✅ Show tutor's own posted profile
-    function showTutorPosts() {
-        const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
-        const myProfile = tutors.find(t => t.email === currentUser.email);
+    async function showTutorPosts() {
         const postsDiv = document.getElementById("tutorPosts");
+        
+        try {
+            const { data: tutors, error } = await db.getTutors();
+            
+            if (error) {
+                postsDiv.innerHTML = '<div style="text-align:center;color:#ef4444;padding:20px;">Failed to load profile</div>';
+                return;
+            }
+            
+            const myProfile = tutors ? tutors.find(t => t.email === currentUser.email) : null;
 
-        if (!myProfile) {
-            postsDiv.innerHTML = '<div style="text-align:center;color:#6b7280;padding:20px;">You haven\'t posted your profile yet. Fill the form above to create your profile.</div>';
-            return;
-        }
+            if (!myProfile) {
+                postsDiv.innerHTML = '<div style="text-align:center;color:#6b7280;padding:20px;">You haven\'t posted your profile yet. Fill the form above to create your profile.</div>';
+                return;
+            }
 
-        postsDiv.innerHTML = `
-            <div class="profile-card">
-                <h3>📋 Your Posted Profile</h3>
-                <p><strong>Name:</strong> ${myProfile.name}</p>
-                <p><strong>University:</strong> ${myProfile.varsity}</p>
-                <p><strong>Subject:</strong> ${myProfile.subject}</p>
-                <p><strong>Location:</strong> ${myProfile.location}</p>
-                <p><strong>Salary:</strong> ৳${myProfile.salary}/month</p>
-                <p style="font-size:12px;color:#6b7280;margin-top:10px;">Posted: ${new Date(myProfile.postedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                
-                <div class="profile-actions">
-                    <button class="btn-edit" onclick="editProfile()">✏️ Edit Profile</button>
-                    <button class="btn-delete" onclick="deleteProfile()">🗑️ Delete Profile</button>
+            postsDiv.innerHTML = `
+                <div class="profile-card">
+                    <h3>📋 Your Posted Profile</h3>
+                    <p><strong>Name:</strong> ${myProfile.name}</p>
+                    <p><strong>University:</strong> ${myProfile.varsity}</p>
+                    <p><strong>Subject:</strong> ${myProfile.subject}</p>
+                    <p><strong>Location:</strong> ${myProfile.location}</p>
+                    <p><strong>Salary:</strong> ৳${myProfile.salary}/month</p>
+                    <p style="font-size:12px;color:#6b7280;margin-top:10px;">Posted: ${new Date(myProfile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    
+                    <div class="profile-actions">
+                        <button class="btn-edit" onclick="editProfile()">✏️ Edit Profile</button>
+                        <button class="btn-delete" onclick="deleteProfile()">🗑️ Delete Profile</button>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        } catch (error) {
+            console.error('Error loading tutor posts:', error);
+            postsDiv.innerHTML = '<div style="text-align:center;color:#ef4444;padding:20px;">Failed to load profile</div>';
+        }
     }
 
-    // Edit profile - scroll to form
     function editProfile() {
         document.getElementById("post-box").scrollIntoView({ behavior: 'smooth' });
         document.getElementById("name").focus();
     }
 
-    // Delete profile
-    function deleteProfile() {
+    async function deleteProfile() {
         if (!confirm("Are you sure you want to delete your profile?")) return;
         
-        const tutors = JSON.parse(localStorage.getItem("tutors")) || [];
-        const filtered = tutors.filter(t => t.email !== currentUser.email);
-        localStorage.setItem("tutors", JSON.stringify(filtered));
-        
-        // Clear form
-        document.getElementById("tutorForm").reset();
-        
-        // Refresh display
-        showTutorPosts();
-        
-        alert("Profile deleted successfully!");
-    }
-
-    function loadMessages() {
-        if (!currentUser || !currentUser.email) return;
-
-        const messages = JSON.parse(localStorage.getItem("messages")) || [];
-        const readMessages = JSON.parse(localStorage.getItem(`readMessages_${currentUser.email}`)) || {};
-        const chatListDiv = document.getElementById("chatList");
-        const messageCountSpan = document.getElementById("messageCount");
-
-        const receivedMessages = messages.filter(m => m.to === currentUser.email);
-
-        if (receivedMessages.length === 0) {
-            chatListDiv.innerHTML = '<div class="no-messages">কোনো মেসেজ এখনও আসেনি। Students রা আপনার সাথে যোগাযোগ করলে এখানে দেখা যাবে।</div>';
-            messageCountSpan.style.display = 'none';
-            return;
-        }
-
-        const messagesBySender = {};
-        receivedMessages.forEach(msg => {
-            if (!messagesBySender[msg.from]) messagesBySender[msg.from] = [];
-            messagesBySender[msg.from].push(msg);
-        });
-
-        chatListDiv.innerHTML = '';
-        let totalUnread = 0;
-
-        Object.keys(messagesBySender).forEach(senderEmail => {
-            const senderMessages = messagesBySender[senderEmail].sort((a, b) => new Date(b.at) - new Date(a.at));
-            const latestMessage = senderMessages[0];
-
-            let unreadCount = senderMessages.filter(m => !(readMessages[m.id])).length;
-            totalUnread += unreadCount;
-
-            const users = JSON.parse(localStorage.getItem("users")) || [];
-            const senderUser = users.find(u => u.email === senderEmail);
-            const senderName = senderUser ? senderUser.name : senderEmail;
-
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'chat-msg new-message';
-            messageDiv.innerHTML = `
-                <div class="sender">👨‍🎓 ${senderName} ${unreadCount > 0 ? `<span class="message-count">${unreadCount}</span>` : ''}</div>
-                <div class="message">"${latestMessage.text}"</div>
-                <div class="time">📅 ${new Date(latestMessage.at).toLocaleString('bn-BD')}</div>
-                <button class="reply-btn" onclick="replyToStudent('${encodeURIComponent(senderEmail)}', '${encodeURIComponent(senderName)}')">
-                    💬 Reply
-                </button>
-            `;
-            chatListDiv.appendChild(messageDiv);
-        });
-
-        if (totalUnread > 0) {
-            messageCountSpan.textContent = totalUnread;
-            messageCountSpan.style.display = 'inline-block';
-        } else {
-            messageCountSpan.style.display = 'none';
-        }
-    }
-
-    function markMessagesRead() {
-        if (!currentUser || !currentUser.email) return;
-        const messages = JSON.parse(localStorage.getItem("messages")) || [];
-        const readMessages = JSON.parse(localStorage.getItem(`readMessages_${currentUser.email}`)) || {};
-
-        messages.forEach(m => {
-            if (m.to === currentUser.email) {
-                readMessages[m.id] = true;
+        try {
+            const { error } = await db.deleteTutor(currentUser.email);
+            
+            if (error) {
+                alert("Failed to delete profile!");
+                return;
             }
-        });
+            
+            document.getElementById("tutorForm").reset();
+            showTutorPosts();
+            alert("Profile deleted successfully!");
+        } catch (error) {
+            console.error('Error deleting profile:', error);
+            alert("Failed to delete profile!");
+        }
+    }
 
-        localStorage.setItem(`readMessages_${currentUser.email}`, JSON.stringify(readMessages));
+    async function loadMessages() {
+        if (!currentUser || !currentUser.email) return;
+
+        try {
+            const { data: messages } = await db.getMessages(currentUser.email) || { data: [] };
+            const readMessages = JSON.parse(localStorage.getItem(`readMessages_${currentUser.email}`)) || {};
+            const chatListDiv = document.getElementById("chatList");
+            const messageCountSpan = document.getElementById("messageCount");
+
+            const receivedMessages = messages ? messages.filter(m => m.to_email === currentUser.email) : [];
+
+            if (receivedMessages.length === 0) {
+                chatListDiv.innerHTML = '<div class="no-messages">কোনো মেসেজ এখনও আসেনি। Students রা আপনার সাথে যোগাযোগ করলে এখানে দেখা যাবে।</div>';
+                messageCountSpan.style.display = 'none';
+                return;
+            }
+
+            const messagesBySender = {};
+            receivedMessages.forEach(msg => {
+                if (!messagesBySender[msg.from_email]) messagesBySender[msg.from_email] = [];
+                messagesBySender[msg.from_email].push(msg);
+            });
+
+            chatListDiv.innerHTML = '';
+            let totalUnread = 0;
+
+            for (const senderEmail of Object.keys(messagesBySender)) {
+                const senderMessages = messagesBySender[senderEmail].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                const latestMessage = senderMessages[0];
+
+                let unreadCount = senderMessages.filter(m => !(readMessages[m.id])).length;
+                totalUnread += unreadCount;
+
+                const { data: senderUser } = await db.getUserByEmail(senderEmail) || {};
+                const senderName = senderUser ? senderUser.name : senderEmail;
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'chat-msg new-message';
+                messageDiv.innerHTML = `
+                    <div class="sender">👨🎓 ${senderName} ${unreadCount > 0 ? `<span class="message-count">${unreadCount}</span>` : ''}</div>
+                    <div class="message">"${latestMessage.text}"</div>
+                    <div class="time">📅 ${new Date(latestMessage.created_at).toLocaleString('bn-BD')}</div>
+                    <button class="reply-btn" onclick="replyToStudent('${encodeURIComponent(senderEmail)}', '${encodeURIComponent(senderName)}')">
+                        💬 Reply
+                    </button>
+                `;
+                chatListDiv.appendChild(messageDiv);
+            }
+
+            if (totalUnread > 0) {
+                messageCountSpan.textContent = totalUnread;
+                messageCountSpan.style.display = 'inline-block';
+            } else {
+                messageCountSpan.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error loading messages:', error);
+        }
     }
 
     function replyToStudent(studentEmailEncoded, studentNameEncoded) {
         const studentEmail = decodeURIComponent(studentEmailEncoded);
         const studentName = decodeURIComponent(studentNameEncoded);
-        markMessagesRead();
         const chatUrl = `chat.html?toEmail=${encodeURIComponent(studentEmail)}&toName=${encodeURIComponent(studentName)}`;
         window.location.href = chatUrl;
     }

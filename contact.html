@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact | Smart Tuition Media</title>
+    <title>Contact Us - Smart Tuition Media</title>
     <style>
         * {
             margin: 0;
@@ -14,11 +14,10 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             color: #2d3748;
-            background: #f7fafc;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
             min-height: 100vh;
         }
 
-        /* Header */
         header {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             padding: 1rem 5%;
@@ -59,174 +58,134 @@
             transform: translateY(-2px);
         }
 
-        /* Main Content */
         #main {
-            padding-top: 70px;
-            min-height: 100vh;
+            padding-top: 90px;
+            padding-bottom: 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 5%;
+            padding-right: 5%;
         }
 
-        /* Page Header Section */
-        .page-header {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            padding: 4rem 5% 3rem;
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .contact-info {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-form {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-info h2,
+        .contact-form h2 {
+            color: #1a202c;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .contact-item .icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            width: 40px;
             text-align: center;
         }
 
-        .page-header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
+        .contact-item .info h4 {
             color: #1a202c;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
-        .page-header p {
-            font-size: 1.1rem;
-            color: #4a5568;
-            max-width: 700px;
-            margin: 0 auto;
+        .contact-item .info p {
+            color: #718096;
         }
 
-        /* Contact Section */
-        #contact-wrapper {
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-            padding: 3rem 5%;
-        }
-
-        #contact-container {
-            max-width: 800px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 2rem;
-        }
-
-        /* Contact Info Card */
-        .contact-info {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-        }
-
-        .contact-info h2 {
-            font-size: 1.5rem;
-            color: #000000;
+        .form-group {
             margin-bottom: 1.5rem;
-            font-weight: 700;
         }
 
-        .contact-info ul {
-            list-style: none;
-        }
-
-        .contact-info ul li {
-            color: #1a202c;
-            font-size: 1rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .contact-info ul li strong {
-            color: #000000;
-            font-weight: 700;
-            min-width: 80px;
-        }
-
-        /* Contact Form Card */
-        .contact-form {
-            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-        }
-
-        .contact-form h2 {
-            font-size: 1.5rem;
-            color: #000000;
-            margin-bottom: 1.5rem;
-            font-weight: 700;
-        }
-
-        label {
+        .form-group label {
             display: block;
-            color: #000000;
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-top: 1rem;
             margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2d3748;
         }
 
-        #name, #msg {
+        .form-group input,
+        .form-group textarea {
             width: 100%;
             padding: 0.75rem;
             border: 2px solid #e2e8f0;
             border-radius: 8px;
-            background: white;
-            color: #1a202c;
             font-size: 1rem;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            transition: all 0.3s ease;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
         }
 
-        #name:focus, #msg:focus {
+        .form-group input:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: #6366f1;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        #msg {
-            resize: vertical;
+        .form-group textarea {
             min-height: 120px;
+            resize: vertical;
         }
 
-        #btn {
-            margin-top: 1.5rem;
-            padding: 0.9rem 2rem;
+        .submit-btn {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
             border: none;
-            border-radius: 8px;
+            padding: 1rem 2rem;
             font-size: 1rem;
             font-weight: 600;
+            border-radius: 8px;
             cursor: pointer;
+            width: 100%;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-            width: 100%;
         }
 
-        #btn:hover {
+        .submit-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
         }
 
-        #btn:active {
-            transform: translateY(0);
+        .submit-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        /* Footer */
-        #part4 {
-            background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
-            padding: 3rem 5%;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            color: white;
-        }
-
-        .no h3 {
-            color: #e0e7ff;
-            font-size: 1.1rem;
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 8px;
             margin-bottom: 1rem;
-            font-weight: 700;
-        }
-
-        .no p {
-            color: #c7d2fe;
-            margin: 0.5rem 0;
-            font-size: 0.9rem;
+            text-align: center;
+            display: none;
         }
 
         @media (max-width: 768px) {
@@ -243,12 +202,14 @@
                 flex-wrap: wrap;
             }
 
-            .page-header h1 {
-                font-size: 2rem;
+            .contact-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
             }
 
-            .contact-info, .contact-form {
-                padding: 1.5rem;
+            .contact-info,
+            .contact-form {
+                padding: 2rem 1.5rem;
             }
         }
     </style>
@@ -262,98 +223,151 @@
             <a href="admins.html">Admins</a>
             <a href="chat.html">Chats</a>
             <a href="contact.html">Contact</a>
-            <a href="login.html">Login</a>
+            <a href="review.html">Rate Us</a>
+            <a href="login.html" id="loginBtn">Login</a>
+            <a href="#" id="logoutBtn" style="display:none;" onclick="logout()">Logout</a>
         </nav>
     </header>
 
     <div id="main">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h1>Contact Us</h1>
-            <p>Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
-        </div>
+        <div class="contact-container">
+            <div class="contact-info">
+                <h2>📞 Get in Touch</h2>
+                <p style="color: #718096; margin-bottom: 2rem; line-height: 1.6;">
+                    Have questions about our tutoring services? We're here to help! 
+                    Reach out to us through any of the following channels.
+                </p>
 
-        <!-- Contact Section -->
-        <div id="contact-wrapper">
-            <div id="contact-container">
-                <!-- Contact Information -->
-                <div class="contact-info">
-                    <h2>Get In Touch</h2>
-                    <ul>
-                        <li><strong>Email:</strong> info@smarttuition.com</li>
-                        <li><strong>Phone:</strong> +8801XXXXXXXXX</li>
-                        <li><strong>Address:</strong> SUST, SYLHET</li>
-                    </ul>
+                <div class="contact-item">
+                    <div class="icon">📧</div>
+                    <div class="info">
+                        <h4>Email</h4>
+                        <p>info@smarttuition.com</p>
+                    </div>
                 </div>
 
-                <!-- Contact Form -->
-                <div class="contact-form">
-                    <h2>Send Us a Message</h2>
-                    <form id="contactform">
-                        <label for="name">Your Name</label>
-                        <input type="text" id="name" placeholder="Enter your name" required>
+                <div class="contact-item">
+                    <div class="icon">📱</div>
+                    <div class="info">
+                        <h4>Phone</h4>
+                        <p>+880 1234 567890</p>
+                    </div>
+                </div>
 
-                        <label for="msg">Your Message</label>
-                        <textarea id="msg" rows="4" placeholder="Enter your message" required></textarea>
+                <div class="contact-item">
+                    <div class="icon">📍</div>
+                    <div class="info">
+                        <h4>Address</h4>
+                        <p>Sylhet, Bangladesh</p>
+                    </div>
+                </div>
 
-                        <button id="btn" type="submit">Send Message</button>
-                    </form>
+                <div class="contact-item">
+                    <div class="icon">🕒</div>
+                    <div class="info">
+                        <h4>Business Hours</h4>
+                        <p>24/7 Online Support</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Footer -->
-        <div id="part4">
-            <div class="no">
-                <h3>Smart Tuition Media</h3>
-                <p>Country's #1 tutor matching platform</p>
-            </div>
-            <div class="no">
-                <h3>Contact</h3>
-                <p>Email: info@smarttuition.com</p>
-                <p>Phone: +880 1234 567890</p>
+            <div class="contact-form">
+                <h2>💬 Send us a Message</h2>
+                
+                <div class="success-message" id="successMessage">
+                    ✓ Thank you! Your message has been sent successfully.
+                </div>
+
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label>Your Name *</label>
+                        <input type="text" id="contactName" placeholder="Enter your full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address *</label>
+                        <input type="email" id="contactEmail" placeholder="Enter your email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Subject *</label>
+                        <input type="text" id="contactSubject" placeholder="What is this about?" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Message *</label>
+                        <textarea id="contactMessage" placeholder="Tell us how we can help you..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">Send Message</button>
+                </form>
             </div>
         </div>
     </div>
 
     <script>
-        window.onload = function () {
-            const user = JSON.parse(localStorage.getItem("currentUser"));
-            if (user && user.name) {
-                const nameInput = document.getElementById("name");
-                nameInput.value = user.name;
-            }
-        };
+        function logout() {
+            localStorage.removeItem("currentUser");
+            window.location.href = "login.html";
+        }
 
-        document.getElementById("contactform").addEventListener("submit", function (e) {
+        window.onload = function() {
+            let user = JSON.parse(localStorage.getItem("currentUser"));
+
+            if (user) {
+                document.getElementById("loginBtn").style.display = "none";
+                document.getElementById("logoutBtn").style.display = "inline-block";
+                
+                // Pre-fill form if user is logged in
+                document.getElementById('contactName').value = user.name || '';
+                document.getElementById('contactEmail').value = user.email || '';
+            } else {
+                document.getElementById("loginBtn").style.display = "inline-block";
+                document.getElementById("logoutBtn").style.display = "none";
+            }
+        }
+
+        // Form Submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const user = JSON.parse(localStorage.getItem("currentUser"));
-            if (!user) {
-                alert("Please login to send a message.");
-                window.location.href = "login.html";
+            const name = document.getElementById('contactName').value.trim();
+            const email = document.getElementById('contactEmail').value.trim();
+            const subject = document.getElementById('contactSubject').value.trim();
+            const message = document.getElementById('contactMessage').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (!name || !email || !subject || !message) {
+                alert('Please fill in all fields!');
                 return;
             }
 
-            const name = document.getElementById("name").value.trim();
-            const msg = document.getElementById("msg").value.trim();
-            
-            if (!name || !msg) {
-                alert("Please fill in all fields.");
-                return;
-            }
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
 
-            const messages = JSON.parse(localStorage.getItem("messages")) || [];
-            messages.push({
-                userEmail: user.email || "",  
-                name,
-                message: msg,
-                time: new Date().toISOString()
-            });
-            localStorage.setItem("messages", JSON.stringify(messages));
+            // Simulate sending message (in real app, send to backend)
+            setTimeout(() => {
+                // Show success message
+                const successMessage = document.getElementById('successMessage');
+                successMessage.style.display = 'block';
+                
+                // Reset form
+                document.getElementById('contactForm').reset();
+                
+                // Re-fill user info if logged in
+                const user = JSON.parse(localStorage.getItem("currentUser"));
+                if (user) {
+                    document.getElementById('contactName').value = user.name || '';
+                    document.getElementById('contactEmail').value = user.email || '';
+                }
 
-            alert("✅ Thank you! Your message has been sent.");
-            this.reset();
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 5000);
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Message';
+            }, 1000);
         });
     </script>
 </body>
