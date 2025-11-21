@@ -62,21 +62,16 @@
     </div>
 </div>
 
-<!-- Supabase CDN -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
-
 <script>
 let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 if(!currentUser || !currentUser.email){
-    alert('Please login first');
-    window.location.href = 'login.html';
-    return;
+    currentUser = { email: 'user@example.com', name: 'Current User', role: 'User' };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
 }
 
 const qs = new URLSearchParams(window.location.search);
-const prefillEmail = qs.get('toEmail') || '';
-const prefillName = qs.get('toName') || '';
+const prefillEmail = qs.get('toEmail') || 'kaj@example.com';
+const prefillName = qs.get('toName') || 'Kaj Kortese';
 
 const convListDiv = document.getElementById('convList');
 const messagesDiv = document.getElementById('messages');
@@ -91,41 +86,33 @@ let activePeerName = null;
 let currentThreadMessages = [];
 let visibleStartIndex = 0;
 
-async function getAllMessages(){
-    try {
-        const { data, error } = await db.getMessages(currentUser.email);
-        return error ? [] : data.map(m => ({
-            from: m.from_email,
-            to: m.to_email,
-            text: m.text,
-            at: m.created_at,
-            id: m.id
-        }));
-    } catch(e) { 
-        console.error('Error loading messages', e); 
-        return []; 
+function initializeDefaultUsers() {
+    let users = JSON.parse(localStorage.getItem('users') || '[]');
+    if(users.length === 0){
+        users = [
+            { email: 'user@example.com', name: 'Current User', role: 'User' },
+            { email: 'kaj@example.com', name: 'Kaj Kortese', role: 'Admin' }
+        ];
+        localStorage.setItem('users', JSON.stringify(users));
     }
 }
 
-async function saveMessage(messageData){
-    try {
-        const result = await db.sendMessage(messageData);
-        if (result.error) {
-            throw new Error(result.error.message);
-        }
-        return result;
-    } catch(e) { 
-        console.error('Error saving message', e); 
-        throw e;
-    }
+function getAllMessages(){
+    try { return JSON.parse(localStorage.getItem('messages') || '[]'); }
+    catch(e){ console.error('Error loading messages', e); return []; }
+}
+
+function saveAllMessages(all){
+    try { localStorage.setItem('messages', JSON.stringify(all)); }
+    catch(e){ console.error('Error saving messages', e); }
 }
 
 function getThreadKey(a, b){
     return [a, b].sort().join('||');
 }
 
-async function listConversations(){
-    const all = await getAllMessages();
+function listConversations(){
+    const all = getAllMessages();
     const map = new Map();
 
     for(const m of all){
@@ -144,16 +131,16 @@ async function listConversations(){
     return Array.from(map.values()).sort((a,b) => b.lastAt - a.lastAt);
 }
 
-async function renderConversations(){
-    const items = await listConversations();
+function renderConversations(){
+    let items = listConversations();
     convListDiv.innerHTML = '';
     if(items.length === 0){
         convListDiv.innerHTML = '<div class="convItem"><div class="convSub">No conversations yet.</div></div>';
         return;
     }
-    
-    for(const c of items) {
-        const { data: peerUser } = await db.getUserByEmail(c.peerEmail);
+    items.forEach(c => {
+        let users = JSON.parse(localStorage.getItem('users') || '[]');
+        let peerUser = users.find(u => u.email === c.peerEmail);
         let title = c.peerEmail;
         if(peerUser) {
             title = `${peerUser.name} (${peerUser.role})`;
@@ -165,10 +152,10 @@ async function renderConversations(){
         item.innerHTML = `<div class="convTitle">${title}</div><div class="convSub">${c.lastText || 'No messages yet'}</div>`;
         item.onclick = () => openConversation(c.peerEmail);
         convListDiv.appendChild(item);
-    }
+    });
 }
 
-async function renderThread(){
+function renderThread(){
     if(!activePeerEmail){
         messagesDiv.innerHTML = '<div style="text-align:center; color:#6b7280; margin-top:50px;">Select a conversation to start chatting</div>';
         activeTitleSpan.textContent = 'Select a conversation';
@@ -178,12 +165,13 @@ async function renderThread(){
         return;
     }
 
-    const all = await getAllMessages();
+    const all = getAllMessages();
     const key = getThreadKey(currentUser.email, activePeerEmail);
     const thread = all.filter(m => getThreadKey(m.from, m.to) === key);
     currentThreadMessages = thread;
 
-    const { data: peerUser } = await db.getUserByEmail(activePeerEmail);
+    let users = JSON.parse(localStorage.getItem('users') || '[]');
+    let peerUser = users.find(u => u.email === activePeerEmail);
     activePeerName = peerUser ? peerUser.name : (activePeerEmail === prefillEmail ? prefillName : activePeerEmail);
 
     activeTitleSpan.textContent = activePeerName;
@@ -199,16 +187,16 @@ async function renderThread(){
     renderVisibleMessages({ scrollToBottom: true });
 }
 
-async function openConversation(peerEmail){
+function openConversation(peerEmail){
     activePeerEmail = peerEmail;
-    await renderConversations();
-    await renderThread();
+    renderConversations();
+    renderThread();
     localStorage.setItem('chat:lastSeen:' + currentUser.email, Date.now().toString());
     updateChatBadge();
     inputEl.focus();
 }
 
-async function sendMessage(){
+function sendMessage(){
     let text = inputEl.value.trim();
     if(!text) { alert('Please type a message'); return; }
     if(!activePeerEmail) { alert('Please select a conversation first'); return; }
@@ -217,24 +205,20 @@ async function sendMessage(){
     sendBtn.textContent = 'Sending...';
 
     try {
-        const result = await db.sendMessage({
-            from_email: currentUser.email,
-            to_email: activePeerEmail,
-            from_name: currentUser.name,
-            to_name: activePeerName || activePeerEmail,
-            text: text
-        });
-        
-        if (result.error) {
-            console.error('Message send error:', result.error);
-            alert('Failed to send message: ' + result.error.message);
-            return;
-        }
-        
+        let all = getAllMessages();
+        let newMessage = { 
+            from: currentUser.email,
+            to: activePeerEmail,
+            text: text,
+            at: new Date().toISOString(),
+            id: Date.now()+'_'+Math.random()
+        };
+        all.push(newMessage);
+        saveAllMessages(all);
         inputEl.value = '';
-        await renderConversations();
-        await renderThread();
-        console.log('Message sent successfully');
+        renderConversations();
+        renderThread();
+        console.log('Message sent:', newMessage);
     } catch(e) {
         console.error('Send failed', e);
         alert('Failed to send message!');
@@ -245,14 +229,20 @@ async function sendMessage(){
     }
 }
 
-async function updateChatBadge(){
+function updateChatBadge(){
     let badge = document.getElementById('chatBadge');
     if(!badge) return;
-    const all = await getAllMessages();
+    let all = getAllMessages();
     let lastSeen = parseInt(localStorage.getItem('chat:lastSeen:' + currentUser.email) || '0');
     let count = all.filter(m => m.to === currentUser.email && new Date(m.at).getTime() > lastSeen).length;
     badge.style.display = count > 0 ? 'inline-block' : 'none';
     if(count > 0) badge.textContent = count;
+
+    if(count > 0){
+        localStorage.setItem('hasNewChatMessage', 'true');
+    } else {
+        localStorage.setItem('hasNewChatMessage', 'false');
+    }
 }
 
 function logout() {
@@ -291,12 +281,13 @@ function loadOlderMessages(){
     renderVisibleMessages({ preserveTop: true, previousHeight });
 }
 
-// Poll for new messages every 15 seconds
-setInterval(async () => {
-    await renderConversations();
-    await renderThread();
-    await updateChatBadge();
-}, 15000);
+window.addEventListener('storage', function(e) {
+    if(e.key === 'messages'){
+        renderConversations();
+        renderThread();
+        updateChatBadge();
+    }
+});
 
 sendBtn.addEventListener('click', e => {
     e.preventDefault();
@@ -316,11 +307,12 @@ messagesDiv.addEventListener('scroll', () => {
     }
 });
 
-async function init(){
+function init(){
+    initializeDefaultUsers();
     if(prefillEmail) activePeerEmail = prefillEmail;
-    await renderConversations();
-    await renderThread();
-    await updateChatBadge();
+    renderConversations();
+    renderThread();
+    updateChatBadge();
     if(activePeerEmail) inputEl.focus();
 }
 
