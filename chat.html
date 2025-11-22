@@ -165,21 +165,18 @@ async function getAllMessages(){
 async function saveMessage(messageData){
     try {
         log(`📤 Sending message to ${messageData.to_email}...`, 'info');
-        log(`Message data: ${JSON.stringify(messageData)}`, 'info');
         
         const result = await db.sendMessage(messageData);
         
         if (result.error) {
             log(`❌ Supabase error: ${result.error.message}`, 'error');
-            log(`Error details: ${JSON.stringify(result.error)}`, 'error');
             throw new Error(result.error.message);
         }
         
-        log(`✅ Message sent successfully! ID: ${result.data?.[0]?.id}`, 'success');
+        log(`✅ Message sent successfully!`, 'success');
         return result;
     } catch(e) { 
-        log(`❌ Exception sending message: ${e.message}`, 'error');
-        console.error('Error saving message', e); 
+        log(`❌ Exception: ${e.message}`, 'error');
         throw e;
     }
 }
@@ -280,12 +277,10 @@ async function openConversation(peerEmail){
 async function sendMessage(){
     let text = inputEl.value.trim();
     if(!text) { 
-        log('⚠️ Empty message', 'error');
         alert('Please type a message'); 
         return; 
     }
     if(!activePeerEmail) { 
-        log('⚠️ No conversation selected', 'error');
         alert('Please select a conversation first'); 
         return; 
     }
@@ -302,24 +297,16 @@ async function sendMessage(){
             text: text
         };
         
-        log(`Attempting to send: "${text}"`, 'info');
-        const result = await saveMessage(messageData);
-        
-        if (result.error) {
-            log(`❌ Send failed: ${result.error.message}`, 'error');
-            alert('Failed to send message: ' + result.error.message);
-            return;
-        }
+        log(`Sending: "${text}"`, 'info');
+        await saveMessage(messageData);
         
         inputEl.value = '';
-        log('🔄 Refreshing conversation...', 'info');
         await renderConversations();
         await renderThread();
-        log('✅ Message sent and UI updated!', 'success');
+        log('✅ Sent!', 'success');
     } catch(e) {
-        log(`❌ Critical error: ${e.message}`, 'error');
-        console.error('Send failed', e);
-        alert('Failed to send message! Check console for details.');
+        log(`❌ Error: ${e.message}`, 'error');
+        alert('Failed to send message: ' + e.message);
     } finally {
         sendBtn.disabled = false;
         sendBtn.textContent = 'Send';
