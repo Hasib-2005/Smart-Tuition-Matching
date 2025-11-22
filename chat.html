@@ -114,7 +114,6 @@ if(!currentUser || !currentUser.email){
 // Check if Supabase loaded
 if (typeof window.supabase === 'undefined') {
     console.error('Supabase failed to load');
-    log('❌ Supabase failed to load', 'error');
     alert('Chat system failed to initialize. Please refresh the page.');
 }
 
