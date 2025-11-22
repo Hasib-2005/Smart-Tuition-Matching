@@ -85,23 +85,24 @@ const db = {
     // Messages table operations
     async sendMessage(messageData) {
         try {
+            const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             const { data, error } = await supabase
                 .from('messages')
                 .insert([{
-                    id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
-                    from_email: messageData.from_email,
-                    to_email: messageData.to_email,
+                    id: messageId,
+                    from_email: messageData.from_email.toLowerCase(),
+                    to_email: messageData.to_email.toLowerCase(),
                     from_name: messageData.from_name,
                     to_name: messageData.to_name,
-                    text: messageData.text,
-                    created_at: new Date().toISOString()
+                    text: messageData.text
                 }])
                 .select();
             
             if (error) {
                 console.error('Supabase insert error:', error);
+                return { data: null, error };
             }
-            return { data, error };
+            return { data, error: null };
         } catch (e) {
             console.error('Network error sending message:', e);
             return { data: null, error: { message: 'Network error: ' + e.message } };
@@ -109,12 +110,13 @@ const db = {
     },
 
     async getMessages(userEmail) {
+        const email = userEmail.toLowerCase();
         const { data, error } = await supabase
             .from('messages')
             .select('*')
-            .or(`from_email.eq.${userEmail},to_email.eq.${userEmail}`)
+            .or(`from_email.eq.${email},to_email.eq.${email}`)
             .order('created_at', { ascending: true });
-        return { data, error };
+        return { data: data || [], error };
     },
 
     // Reviews table operations
