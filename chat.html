@@ -63,7 +63,7 @@
 </div>
 
 <!-- Supabase CDN -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 
 <script>
@@ -71,7 +71,12 @@ let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 if(!currentUser || !currentUser.email){
     alert('Please login first');
     window.location.href = 'login.html';
-    return;
+}
+
+// Check if Supabase loaded
+if (typeof window.supabase === 'undefined') {
+    console.error('Supabase failed to load');
+    alert('Chat system failed to initialize. Please refresh the page.');
 }
 
 const qs = new URLSearchParams(window.location.search);

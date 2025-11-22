@@ -2,8 +2,18 @@
 const SUPABASE_URL = 'https://smyiiuycctamasvymptd.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteWlpdXljY3RhbWFzdnltcHRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NTg2ODksImV4cCI6MjA3OTIzNDY4OX0.VdZSA3q_9-2j5JIPc-iKkzn81SfgaVzzXXIXMfc0ak4';
 
-// Initialize Supabase client
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Initialize Supabase client with proper options
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+        persistSession: false,
+        autoRefreshToken: false
+    },
+    global: {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }
+});
 
 // Database helper functions
 const db = {
@@ -74,19 +84,28 @@ const db = {
 
     // Messages table operations
     async sendMessage(messageData) {
-        const { data, error } = await supabase
-            .from('messages')
-            .insert([{
-                id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
-                from_email: messageData.from_email,
-                to_email: messageData.to_email,
-                from_name: messageData.from_name,
-                to_name: messageData.to_name,
-                text: messageData.text,
-                created_at: new Date().toISOString()
-            }])
-            .select();
-        return { data, error };
+        try {
+            const { data, error } = await supabase
+                .from('messages')
+                .insert([{
+                    id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
+                    from_email: messageData.from_email,
+                    to_email: messageData.to_email,
+                    from_name: messageData.from_name,
+                    to_name: messageData.to_name,
+                    text: messageData.text,
+                    created_at: new Date().toISOString()
+                }])
+                .select();
+            
+            if (error) {
+                console.error('Supabase insert error:', error);
+            }
+            return { data, error };
+        } catch (e) {
+            console.error('Network error sending message:', e);
+            return { data: null, error: { message: 'Network error: ' + e.message } };
+        }
     },
 
     async getMessages(userEmail) {
