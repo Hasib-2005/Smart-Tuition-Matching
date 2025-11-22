@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Chat</title>
+    <title>Chat - Debug Version</title>
     <style>
         body { background:#f3eefe; margin: 0; font-family: Arial, sans-serif; }
         header { background: #6366f1; color: white; padding: 0.5rem 1rem; display: flex; justify-content: space-between; align-items: center; }
@@ -31,6 +31,25 @@
         #sendBtn { padding: 10px 16px; background:#165b3c; color:white; border:none; border-radius:10px; cursor: pointer; }
         #sendBtn:hover { background:#28845c; }
         #sendBtn:disabled { background: #ccc; cursor: not-allowed; }
+        #debugConsole { 
+            position: fixed; 
+            bottom: 10px; 
+            right: 10px; 
+            width: 350px; 
+            max-height: 200px; 
+            background: #1e293b; 
+            color: #10b981; 
+            padding: 10px; 
+            border-radius: 8px; 
+            font-family: monospace; 
+            font-size: 11px; 
+            overflow: auto; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 9999;
+        }
+        .debug-error { color: #ef4444; }
+        .debug-success { color: #10b981; }
+        .debug-info { color: #3b82f6; }
     </style>
 </head>
 <body>
@@ -62,13 +81,32 @@
     </div>
 </div>
 
+<!-- Debug Console -->
+<div id="debugConsole">
+    <div style="margin-bottom:5px; font-weight:bold; color:#fbbf24;">🐛 Debug Console</div>
+    <div id="debugLog"></div>
+</div>
+
 <!-- Supabase CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 
 <script>
+// Debug Logger
+const debugLog = document.getElementById('debugLog');
+function log(message, type = 'info') {
+    const time = new Date().toLocaleTimeString();
+    const className = type === 'error' ? 'debug-error' : type === 'success' ? 'debug-success' : 'debug-info';
+    debugLog.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
+    debugLog.scrollTop = debugLog.scrollHeight;
+    console.log(`[${type.toUpperCase()}]`, message);
+}
+
+log('🚀 Chat system initializing...', 'info');
+
 let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 if(!currentUser || !currentUser.email){
+    log('❌ No user found, redirecting to login', 'error');
     alert('Please login first');
     window.location.href = 'login.html';
 }
@@ -78,6 +116,8 @@ if (typeof window.supabase === 'undefined') {
     console.error('Supabase failed to load');
     alert('Chat system failed to initialize. Please refresh the page.');
 }
+
+log(`✅ Current user: ${currentUser.email}`, 'success');
 
 const qs = new URLSearchParams(window.location.search);
 const prefillEmail = qs.get('toEmail') || '';
@@ -98,8 +138,16 @@ let visibleStartIndex = 0;
 
 async function getAllMessages(){
     try {
+        log('📥 Fetching all messages...', 'info');
         const { data, error } = await db.getMessages(currentUser.email);
-        return error ? [] : data.map(m => ({
+        
+        if(error) {
+            log(`❌ Error fetching messages: ${error.message}`, 'error');
+            return [];
+        }
+        
+        log(`✅ Fetched ${data.length} messages`, 'success');
+        return data.map(m => ({
             from: m.from_email,
             to: m.to_email,
             text: m.text,
@@ -107,6 +155,7 @@ async function getAllMessages(){
             id: m.id
         }));
     } catch(e) { 
+        log(`❌ Exception fetching messages: ${e.message}`, 'error');
         console.error('Error loading messages', e); 
         return []; 
     }
@@ -114,12 +163,21 @@ async function getAllMessages(){
 
 async function saveMessage(messageData){
     try {
+        log(`📤 Sending message to ${messageData.to_email}...`, 'info');
+        log(`Message data: ${JSON.stringify(messageData)}`, 'info');
+        
         const result = await db.sendMessage(messageData);
+        
         if (result.error) {
+            log(`❌ Supabase error: ${result.error.message}`, 'error');
+            log(`Error details: ${JSON.stringify(result.error)}`, 'error');
             throw new Error(result.error.message);
         }
+        
+        log(`✅ Message sent successfully! ID: ${result.data?.[0]?.id}`, 'success');
         return result;
     } catch(e) { 
+        log(`❌ Exception sending message: ${e.message}`, 'error');
         console.error('Error saving message', e); 
         throw e;
     }
@@ -130,6 +188,7 @@ function getThreadKey(a, b){
 }
 
 async function listConversations(){
+    log('📋 Listing conversations...', 'info');
     const all = await getAllMessages();
     const map = new Map();
 
@@ -146,7 +205,10 @@ async function listConversations(){
             }
         }
     }
-    return Array.from(map.values()).sort((a,b) => b.lastAt - a.lastAt);
+    
+    const conversations = Array.from(map.values()).sort((a,b) => b.lastAt - a.lastAt);
+    log(`✅ Found ${conversations.length} conversations`, 'success');
+    return conversations;
 }
 
 async function renderConversations(){
@@ -205,6 +267,7 @@ async function renderThread(){
 }
 
 async function openConversation(peerEmail){
+    log(`💬 Opening conversation with ${peerEmail}`, 'info');
     activePeerEmail = peerEmail;
     await renderConversations();
     await renderThread();
@@ -215,34 +278,47 @@ async function openConversation(peerEmail){
 
 async function sendMessage(){
     let text = inputEl.value.trim();
-    if(!text) { alert('Please type a message'); return; }
-    if(!activePeerEmail) { alert('Please select a conversation first'); return; }
+    if(!text) { 
+        log('⚠️ Empty message', 'error');
+        alert('Please type a message'); 
+        return; 
+    }
+    if(!activePeerEmail) { 
+        log('⚠️ No conversation selected', 'error');
+        alert('Please select a conversation first'); 
+        return; 
+    }
 
     sendBtn.disabled = true;
     sendBtn.textContent = 'Sending...';
 
     try {
-        const result = await db.sendMessage({
+        const messageData = {
             from_email: currentUser.email,
             to_email: activePeerEmail,
             from_name: currentUser.name,
             to_name: activePeerName || activePeerEmail,
             text: text
-        });
+        };
+        
+        log(`Attempting to send: "${text}"`, 'info');
+        const result = await saveMessage(messageData);
         
         if (result.error) {
-            console.error('Message send error:', result.error);
+            log(`❌ Send failed: ${result.error.message}`, 'error');
             alert('Failed to send message: ' + result.error.message);
             return;
         }
         
         inputEl.value = '';
+        log('🔄 Refreshing conversation...', 'info');
         await renderConversations();
         await renderThread();
-        console.log('Message sent successfully');
+        log('✅ Message sent and UI updated!', 'success');
     } catch(e) {
+        log(`❌ Critical error: ${e.message}`, 'error');
         console.error('Send failed', e);
-        alert('Failed to send message!');
+        alert('Failed to send message! Check console for details.');
     } finally {
         sendBtn.disabled = false;
         sendBtn.textContent = 'Send';
@@ -322,11 +398,15 @@ messagesDiv.addEventListener('scroll', () => {
 });
 
 async function init(){
-    if(prefillEmail) activePeerEmail = prefillEmail;
+    if(prefillEmail) {
+        log(`📧 Prefilled conversation: ${prefillEmail}`, 'info');
+        activePeerEmail = prefillEmail;
+    }
     await renderConversations();
     await renderThread();
     await updateChatBadge();
     if(activePeerEmail) inputEl.focus();
+    log('✅ Chat system ready!', 'success');
 }
 
 init();
