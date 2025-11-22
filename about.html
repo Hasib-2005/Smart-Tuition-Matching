@@ -15,11 +15,12 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             color: #2d3748;
             background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+              background: linear-gradient(135deg, #e0e7ff 0%, #fae8ff 100%);
             min-height: 100vh;
         }
 
         header {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+               background: linear-gradient(135deg, #4157b7 0%, #764ba2 100%);
             padding: 1rem 5%;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             position: fixed;
@@ -59,78 +60,147 @@
         }
 
         #main {
-            padding-top: 90px;
-            padding-bottom: 50px;
+            padding-top: 70px;
+        }
+
+        /* About Section - Light Purple */
+        #about-section {
+            background: linear-gradient(135deg, #e0e7ff 0%, #fae8ff 100%);
+            padding: 5rem 5% 4rem;
+        }
+
+        .about-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .about-container h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 2rem;
+            line-height: 1.2;
+        }
+
+        .about-container p {
+            font-size: 1.1rem;
+            color: #000000;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .about-container p b {
+            color: #667eea;
+            color: #6d4ea0;
+            font-weight: 700;
+            font-size: larger;
+        }
+
+        .about-features {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            text-align: left;
+        }
+
+        .about-features ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .about-features ul li {
+            font-size: 1.1rem;
+            color: #000000;
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .about-features ul li::before {
+            content: '✓';
+       
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            color: #865cc9;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Section Title */
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin: 0;
+            padding: 3rem 5% 2rem;
+        }
+
+        /* Features Section - Light Green */
+        #features-wrapper {
+            /* background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); */
+              background: linear-gradient(135deg, #e0e7ff 0%, #fae8ff 100%);
+            padding: 3rem 0;
+        }
+
+        #part3-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 0 5%;
             max-width: 1200px;
             margin: 0 auto;
-            padding-left: 5%;
-            padding-right: 5%;
         }
 
-        .hero-section {
-            text-align: center;
-            padding: 3rem 0;
+        .feature-box {
             background: white;
-            border-radius: 16px;
-            margin-bottom: 3rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .hero-section h1 {
-            font-size: 2.5rem;
-            color: #1a202c;
-            margin-bottom: 1rem;
-        }
-
-        .hero-section p {
-            font-size: 1.2rem;
-            color: #718096;
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 2rem;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            transition: transform 0.3s ease;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
-        .feature-card:hover {
+        .feature-box:hover {
             transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
-        .feature-card .icon {
-            font-size: 3rem;
+        .feature-icon {
+            font-size: 2.5rem;
             margin-bottom: 1rem;
         }
 
-        .feature-card h3 {
+        .feature-box h3 {
+            font-size: 1.1rem;
             color: #1a202c;
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
         }
 
-        .feature-card p {
+        .feature-box p {
+            font-size: 0.9rem;
             color: #718096;
-            line-height: 1.6;
+            line-height: 1.5;
         }
+   .stats-section h2 {
+            color: #1a202c;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+
 
         .stats-section {
             background: white;
             padding: 3rem 2rem;
             border-radius: 16px;
             margin-bottom: 3rem;
+            margin-left: 6rem;
+            margin-right: 6rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
@@ -188,53 +258,64 @@
     </header>
 
     <div id="main">
-        <div class="hero-section">
-            <h1>About Smart Tuition Media</h1>
-            <p>
-                We are Bangladesh's leading online platform connecting students with qualified tutors. 
-                Our mission is to make quality education accessible to everyone through personalized tutoring services.
-            </p>
+        <!-- About Section - Light Purple -->
+        <div id="about-section">
+            <div class="about-container">
+                <h1>About Us</h1>
+                <p>
+                    <b>Smart Tuition Media</b> is one of the leading tutor-matching platforms in the country.<br><br>
+                    Our goal is to create an easy and "smart" connection between skilled teachers and enthusiastic students.
+                </p>
+                <div class="about-features">
+                    <ul>
+                        <li>Many years of experience</li>
+                        <li>Trusted and experienced team</li>
+                        <li>Simple, modern usability</li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="icon">🎯</div>
-                <h3>Personalized Matching</h3>
-                <p>Our smart algorithm matches students with the perfect tutors based on subject, location, and learning preferences.</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="icon">✅</div>
-                <h3>Verified Tutors</h3>
-                <p>All our tutors are thoroughly verified and come from reputed universities with proven teaching experience.</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="icon">💬</div>
-                <h3>Instant Communication</h3>
-                <p>Connect with tutors instantly through our built-in chat system and schedule sessions at your convenience.</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="icon">📱</div>
-                <h3>Easy to Use</h3>
-                <p>Our user-friendly platform makes it simple to find, connect, and learn from the best tutors in your area.</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="icon">🏆</div>
-                <h3>Quality Assurance</h3>
-                <p>We maintain high standards through regular feedback and rating systems to ensure the best learning experience.</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="icon">💰</div>
-                <h3>Affordable Rates</h3>
-                <p>Find tutors within your budget with transparent pricing and no hidden fees.</p>
+        <!-- Why Section - Light Green Background -->
+        <div id="features-wrapper">
+            <p class="section-title">Why Smart Tuition Media?</p>
+            
+            <div id="part3-features">
+                <div class="feature-box">
+                    <div class="feature-icon">✓</div>
+                    <h3>Verified Teachers</h3>
+                    <p>All teachers are verified to ensure quality education for your children.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">📚</div>
+                    <h3>All Subjects & Classes</h3>
+                    <p>From Class 1 to University level, find teachers for any subject.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">💻</div>
+                    <h3>Online & In-Person</h3>
+                    <p>Choose between online tutoring or in-person home tuition.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">💰</div>
+                    <h3>Transparent Pricing</h3>
+                    <p>See hourly rates upfront with no hidden fees.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">📞</div>
+                    <h3>Easy Contact</h3>
+                    <p>Connect directly with teachers via WhatsApp or phone.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Nationwide Coverage</h3>
+                    <p>Find teachers in your city or learn online from anywhere.</p>
+                </div>
             </div>
         </div>
 
         <div class="stats-section">
+                 <h2>📊 Platform Statistics</h2>
             <div class="stats-grid">
                 <div class="stat-item">
                     <h3 id="totalTutors">0</h3>
@@ -242,11 +323,11 @@
                 </div>
                 <div class="stat-item">
                     <h3 id="totalUsers">0</h3>
-                    <p>Happy Students</p>
+                    <p>Registered Users</p>
                 </div>
                 <div class="stat-item">
                     <h3 id="totalReviews">0</h3>
-                    <p>Success Stories</p>
+                    <p>User Reviews</p>
                 </div>
                 <div class="stat-item">
                     <h3 id="avgRating">0</h3>
