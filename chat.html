@@ -88,7 +88,7 @@
 </div>
 
 <!-- Supabase CDN -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 
 <script>
@@ -109,6 +109,13 @@ if(!currentUser || !currentUser.email){
     log('❌ No user found, redirecting to login', 'error');
     alert('Please login first');
     window.location.href = 'login.html';
+}
+
+// Check if Supabase loaded
+if (typeof window.supabase === 'undefined') {
+    console.error('Supabase failed to load');
+    log('❌ Supabase failed to load', 'error');
+    alert('Chat system failed to initialize. Please refresh the page.');
 }
 
 log(`✅ Current user: ${currentUser.email}`, 'success');
