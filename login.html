@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Smart Tuition Media</title>
+    
+    <!-- EmailJS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script>
+        // Initialize EmailJS with your PUBLIC KEY
+        window.addEventListener("load", function () {
+            if (window.emailjs) {
+                emailjs.init("Q3Th_ygTMmlLM1OxY"); // your public key
+            } else {
+                console.error("EmailJS failed to load.");
+            }
+        });
+    </script>
+    
     <style>
         * {
             margin: 0;
@@ -466,13 +480,44 @@
                     return;
                 }
 
+                if (!window.emailjs) {
+                    console.error("EmailJS is not available.");
+                    showMsg("Failed to send OTP. EmailJS not loaded.", "crimson");
+                    return;
+                }
+
                 const otp = generateOTP();
                 const expiry = Date.now() + 5 * 60 * 1000; // 5 minutes
                 localStorage.setItem('resetOTP:'+email, JSON.stringify({ otp, expiry }));
 
-                // For demo purposes - in real implementation, use EmailJS
-                showMsg(`OTP sent to your email: ${otp} (Demo)`, 'green');
-                fpStep2.style.display='block';
+                const sentTime = new Date().toLocaleTimeString();
+
+                fpSendOtp.disabled = true;
+                fpSendOtp.textContent = "Sending OTP...";
+
+                emailjs
+                    .send(
+                        "service_wqurq5j",      // your service ID
+                        "template_6lywhyw",     // your template ID
+                        {
+                            to_email: email,
+                            otp: otp,
+                            time: sentTime
+                        }
+                    )
+                    .then(res => {
+                        console.log("Reset password EmailJS success:", res);
+                        showMsg("OTP sent to your email. Check your inbox/spam.", "green");
+                        fpStep2.style.display='block';
+                    })
+                    .catch(err => {
+                        console.error("Reset password EmailJS error:", err);
+                        showMsg("Failed to send OTP. Please try again.", "crimson");
+                    })
+                    .finally(() => {
+                        fpSendOtp.disabled = false;
+                        fpSendOtp.textContent = "Send OTP";
+                    });
             } catch (error) {
                 console.error('Email check error:', error);
                 showMsg('Failed to verify email.', 'crimson');
