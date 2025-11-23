@@ -5,10 +5,11 @@
 html,body{
     width: 100%;
     height: 100%;
+    
 }
 header{
-    background: linear-gradient(to right, #1e293b, #6366f1);
-    height: 67px;
+     background: linear-gradient(135deg, #4157b7 0%, #764ba2 100%);
+    height: 70px;
     width: 100%;
     color: white;
     /* display: flex;  সব এক লাইনে নেয় */
@@ -28,7 +29,7 @@ h2{
     font-size: xx-large;
 }
 #fake{
-    height: 67px;
+    height: 70px;
     width: 100%;
 }
 
